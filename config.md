@@ -1,6 +1,9 @@
 <!--
 Add here global page variables to use throughout your website.
 -->
+
+@def prepath = "em-course" 
+
 +++
 author = "Mar Reguant"
 mintoclevel = 2
@@ -14,8 +17,8 @@ ignore = ["node_modules/"]
 
 # RSS (the website_{title, descr, url} must be defined to get RSS)
 generate_rss = true
-website_title = "em-course"
-website_descr = "Electricity Markets Course"
+website_title = "Electricity Markets Course"
+website_descr = "A 5-day course on the economincs of electricity markets taught by Mar Reguant."
 website_url   = "https://mreguant.github.io/em-course/"
 +++
 

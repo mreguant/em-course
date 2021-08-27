@@ -16,8 +16,7 @@ ignore = ["node_modules/", "franklin", "franklin.pub"]
 generate_rss = true
 website_title = "Electricity Markets Course"
 website_descr = "A 5-day course on the economincs of electricity markets taught by Mar Reguant."
-website_url   = "https://mreguant.github.io/"
-prepath = "em-course"
+website_url   = "https://mreguant.github.io/em-course/"
 +++
 
 <!--

@@ -16,9 +16,9 @@ The goal of the course is twofold:
 
 We will be using Julia and Pluto.jl to run the exercises. For this, **you will need to install Julia in your computer, and add the Pluto package to Julia.** 
 
-You can follow this amazing guide form [Florian Oswald](https://floswald.github.io/) to get started into installing this in your computer: [How to install Julia and Pluto.jl](https://floswald.github.io/NumericalMethods/installation/)
+You can follow this amazing guide form MIT to get started into installing this in your computer: [How to install Julia and Pluto.jl](https://computationalthinking.mit.edu/Spring21/installation/)
 
-> Credit goes to Florian Oswald more generally for learning about Pluto notebooks!
+> Credit goes to [Florian Oswald](https://floswald.github.io) for learning about these resources!
 
 
 ### Flow

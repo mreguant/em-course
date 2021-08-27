@@ -1,7 +1,6 @@
 <!--
 Add here global page variables to use throughout your website.
 -->
-
 +++
 author = "Mar Reguant"
 mintoclevel = 2

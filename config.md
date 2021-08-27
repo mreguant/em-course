@@ -2,12 +2,9 @@
 Add here global page variables to use throughout your website.
 -->
 
-@def prepath = "em-course" 
-
 +++
 author = "Mar Reguant"
 mintoclevel = 2
-prepath = "em-course"
 
 # Add here files or directories that should be ignored by Franklin, otherwise
 # these files might be copied and, if markdown, processed by Franklin which
@@ -19,7 +16,8 @@ ignore = ["node_modules/"]
 generate_rss = true
 website_title = "Electricity Markets Course"
 website_descr = "A 5-day course on the economincs of electricity markets taught by Mar Reguant."
-website_url   = "https://mreguant.github.io/em-course/"
+website_url   = "https://mreguant.github.io/"
+prepath = "em-course"
 +++
 
 <!--

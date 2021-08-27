@@ -3,7 +3,6 @@ title = "Day 1"
 hascode = true
 date = Date(2021, 6, 9)
 +++
-@def tags = ["syntax", "code"]
 
 # Working with code blocks
 

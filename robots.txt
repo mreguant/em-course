@@ -1,0 +1,4 @@
+Sitemap: https://mreguant.github.io/em-course/sitemap.xml
+
+User-agent: *
+Disallow:

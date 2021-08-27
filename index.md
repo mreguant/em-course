@@ -1,8 +1,3 @@
-@def title = "Electricity Markets Course"
-@def tags = ["intro", "code"]
-
-# Electricity markets course -->
-
 In this **5-day course**, we will learn about the **economics of electricity markets** and how to use code to model them. The class is taught by [Mar Reguant](https://mreguant.github.io).
 
 The goal of the course is twofold:

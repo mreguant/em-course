@@ -1,5 +1,5 @@
-@def title = "Electricity Markets Course"
-@def tags = ["intro", "code"]
+<!-- @def title = "Electricity Markets Course"
+@def tags = ["intro", "code"] -->
 
 # Electricity markets course 
 
@@ -21,6 +21,18 @@ We will be using Julia and Pluto.jl to run the exercises. For this, **you will n
 You can follow this amazing guide form [Florian Oswald](https://floswald.github.io/) to get started into installing this in your computer: [How to install Julia and Pluto.jl](https://floswald.github.io/NumericalMethods/installation/)
 
 > More generally, you can credit Florian Oswald for his ideas of how to create a teaching website using Julia!
+
+
+## Flow
+
+
+
+
+
+
+
+
+
 
 * element with **bold**
 * element with _emph_

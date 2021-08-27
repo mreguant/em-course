@@ -97,7 +97,7 @@ h6 {
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.7rem;
 }
 
 h2 {
@@ -281,8 +281,8 @@ html {
 .sidebar-about h1 {
   color: #fff;
   margin-top: 0;
-  font-family: "Abril Fatface", serif;
-  font-size: 3.25rem;
+  font-family: "Helvetica", serif;
+  font-size: 2rem;
 }
 
 /* Sidebar nav */

@@ -13,7 +13,7 @@ We will be using Julia and Pluto.jl to run the exercises. For this, **you will n
 
 You can follow this amazing guide form MIT to get started into installing this in your computer: [How to install Julia and Pluto.jl](https://computationalthinking.mit.edu/Spring21/installation/)
 
-> Credit goes to [Florian Oswald](https://floswald.github.io) for learning about these resources!
+> Credit goes to [Florian Oswald](https://floswald.github.io) for learning about these resources. Check his website for amazing computational IO tools with Julia.
 
 
 ### Flow

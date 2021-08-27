@@ -1,4 +1,4 @@
-<!-- @def title = "Electricity Markets Course"
+@def title = "Electricity Markets Course"
 @def tags = ["intro", "code"]
 
 # Electricity markets course -->

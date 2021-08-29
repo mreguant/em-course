@@ -12,4 +12,4 @@ date = Date(2021, 9, 9)
 
 ## Practical exercise
 
-## References
+## References and readings

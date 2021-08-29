@@ -16,9 +16,9 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 ## Practical exercise
 
-* **Exercise file**: [day1.jl](/_assets/day1/day1.jl)
+* **Exercise file**: [day1.jl](/materials/day1/day1.jl)
 
-* **Data file**: [data_spain.csv](/_assets/day1/data_spain.csv)
+* **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file and the data CSV file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. 

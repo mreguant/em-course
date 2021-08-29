@@ -6,12 +6,10 @@ date = Date(2021, 8, 9)
 
 # Day 3: Supply side II
 
-<!-- \toc -->
+:warning: Materials under construction!
 
 ## Lecture
 
 ## Practical exercise
-
-## Homework
 
 ## References

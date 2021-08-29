@@ -7,8 +7,7 @@ The goal of the course is threefold:
 
 <!-- \tableofcontents you can use \toc as well -->
 
-
-### Preliminaries
+## Preliminaries
 
 We will be using Julia and Pluto.jl to run the exercises. For this, **you will need to install Julia in your computer, and add the Pluto package to Julia.** 
 
@@ -16,8 +15,13 @@ You can follow this amazing guide form MIT to get started into installing this i
 
 > Credit goes to [Florian Oswald](https://floswald.github.io) for learning about these resources. Check his website for amazing computational tools with Julia.
 
+:exclamation: It is **highly recommended** to make sure you can use Julia and Pluto before class starts.
 
-### Flow
+## Further optional prep
+
+We will be using **JuMP**, a **mathematical programming library for Julia**. You do not need to actively prep for this, but if you are eager to learn about it, you can find a great JuMP tutorial [here](https://github.com/jump-dev/JuMPTutorials.jl). 
+
+## Flow
 Each day, we will cover topics in the first half of the class, and then we will do examples in the second half. You will be able to modify the exercises at home for additional practice.
 
 In each **day page** you will find the necessary material:

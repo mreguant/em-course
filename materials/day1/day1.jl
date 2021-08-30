@@ -41,11 +41,31 @@ Let's load the libraries we will use. Here we will be loading a bunch of librari
 **Note:** We will greatly benefit from Julia once we use the mathematical programming library tomorrow. 
 """
 
+# ╔═╡ a38335ed-32a3-4168-9cc4-a83af5fc02dd
+md"""
+
+We load the data using the Pandas Python syntax (`read_csv`) into a data frame called `df`. `head(df)` gives us a snapshot of the data.
+
+"""
+
 # ╔═╡ 3f7c3d49-664d-4ec6-baa6-43ff17187e79
 begin
 	df = read_csv("data_spain.csv")
 	head(df)
 end
+
+# ╔═╡ bfd872df-dc2c-473b-9536-eb5736b0ec9f
+md"""
+
+We will be plotting the impacts of wind on several outcomes of interest:
+* Emissions
+* Wholesale prices
+* System costs
+* Wholesale prices + system costs
+
+We will be using the Python library `matplotlib` for plotting, which has more "canned" commands that we can readily use for statistical analysis.
+
+"""
 
 # ╔═╡ f6d3813c-a11f-48ee-9212-15a67c71cf4b
 begin
@@ -395,7 +415,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─ec2c5947-3b0b-4214-8c56-06c5cea7eee9
 # ╟─ef70b7d4-0719-11ec-290f-9539c06bdd7e
 # ╠═0bde0adc-136d-4aec-8e2b-3341555ad8c0
+# ╠═a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
+# ╟─bfd872df-dc2c-473b-9536-eb5736b0ec9f
 # ╠═f6d3813c-a11f-48ee-9212-15a67c71cf4b
 # ╠═e0e57a26-ea5f-47ad-9d13-5492cf5af1c5
 # ╠═68429700-c94c-45f6-9765-53478aaed243

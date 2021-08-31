@@ -17,6 +17,8 @@ You can follow this amazing guide form MIT to get started into installing this i
 
 :exclamation: It is **highly recommended** to make sure you can use Julia and Pluto before class starts.
 
+:information_source: You can **test the installation** by checking this small workbook plotting installed wind capacity in a few select countries. Download the [exercise file](/materials/day0/day0.jl) and [data file](/materials/day0/cumulative-installed-wind-energy-capacity-gigawatts.csv) in the same folder, and open the exercise file from Pluto to get started.
+
 ## Further optional prep
 
 We will be using **JuMP**, a **mathematical programming library for Julia**. You do not need to actively prep for this, but if you are eager to learn about it, you can find a great JuMP tutorial [here](https://github.com/jump-dev/JuMPTutorials.jl). 

@@ -6,6 +6,8 @@ date = Date(2021, 6, 9)
 
 # Day 1: Introduction
 
+:warning: Materials under construction!
+
 In the first lecture, we will talk about the many changes that are occurring in electricity markets with an emphasis on the expansion of renewables with stronger climate policies and cheaper costs. 
 
 In the practical session, we will get familiar with a dataset of electricity market hourly data, and analyze the impact that wind is having on this market.

@@ -22,6 +22,8 @@ The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (wor
 
 * Borenstein, S. (2012). The Redistributional Impact of Nonlinear Electricity Pricing. American Economic Journal: Economic Policy, 4(3), 56–90. [https://doi.org/10.1257/pol.4.3.56](https://doi.org/10.1257/pol.4.3.56)
 
+* Burger, S. P., Knittel, C. R., Pérez-Arriaga, I. J., Schneider, I., & Vom Scheidt, F. (2020). The efficiency and distributional effects of alternative residential electricity rate designs. Energy Journal, 41(1), 199–239. [https://doi.org/10.5547/01956574.41.1.SBUR](https://doi.org/10.5547/01956574.41.1.SBUR)
+
 * Feger, F., Pavanini, N., & Radulescu, D. (2020). Welfare and Redistribution in Residential Electricity Markets with Solar Power. _Working Paper_.
 
 * Wang, Reguant, Fabra, and Cahana (2021). The Distributional Impacts of Real-Time Pricing. _Work in progress_.

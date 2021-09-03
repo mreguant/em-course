@@ -20,4 +20,6 @@ The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (202
 
 ## References and readings
 
+* Burlig, F., Knittel, C., Rapson, D., Reguant, M., & Wolfram, C. (2020). Machine Learning from Schools about Energy Efficiency. Journal of the Association of Environmental and Resource Economists, 7(6), 1181–1217. [https://doi.org/10.1086/710606](https://doi.org/10.1086/710606)
+
 * Fabra, N., Rapson, D., Reguant, M., & Wang, J. (2021). Estimating the Elasticity to Real-Time Pricing: Evidence from the Spanish Electricity Market. AEA Papers and Proceedings, 111, 425–429. [https://doi.org/10.1257/pandp.20211007](https://doi.org/10.1257/pandp.20211007)

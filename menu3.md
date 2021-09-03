@@ -20,4 +20,10 @@ The exercise will be based on the paper by Fowlie, Petersen, and Reguant (2021).
 
 ## References and readings
 
+* Bushnell, J. B., Holland, S. P., Hughes, J. E., & Knittel, C. R. (2017). Strategic policy choice in state-level regulation: The EPA’s clean power plan. American Economic Journal: Economic Policy, 9(2), 57–90. [https://doi.org/10.1257/pol.20150237](https://doi.org/10.1257/pol.20150237)
+
+* Davis, L., & Hausman, C. (2016). Market impacts of a nuclear power plant closure. American Economic Journal: Applied Economics, 8(2), 92–122. [https://doi.org/10.1257/app.20140473](https://doi.org/10.1257/app.20140473)
+
+* Bushnell, J., Chen, Y., & Zaragoza-Watkins, M. (2014). Downstream regulation of CO2 emissions in California’s electricity sector. Energy Policy, 64, 313–323. [https://doi.org/10.1016/j.enpol.2013.08.065](https://doi.org/10.1016/j.enpol.2013.08.065)
+
 * Fowlie, M., & Reguant, M. (2018). Challenges in the Measurement of Leakage Risk. AEA Papers and Proceedings, 108, 124–129. [https://doi.org/10.1257/pandp.20181087](https://doi.org/10.1257/pandp.20181087)

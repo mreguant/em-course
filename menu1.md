@@ -16,7 +16,9 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 * **Slides**: 
 
-## Practical exercise
+## Practical exercise: Wind impacts in Spain
+
+The exercise will be based on the paper by Petersen, Reguant, and Segura (2021). Reading the paper in advance is encouraged.
 
 * **Exercise file**: [day1.jl](/materials/day1/day1.jl)
 
@@ -36,3 +38,5 @@ In the practical session, we will get familiar with a dataset of electricity mar
 * Liski, M., & Vehviläinen, I. (2020). Gone with the Wind? An Empirical Analysis of the Equilibrium Impact of Renewable Energy. Journal of the Association of Environmental and Resource Economists, 7(5), 873–900. [https://doi.org/10.1086/709648](https://doi.org/10.1086/709648)
 
 * Novan, K. (2015). Valuing the Wind: Renewable Energy Policies and Air Pollution Avoided. American Economic Journal: Economic Policy, 7(3), 291–326. [https://doi.org/10.1257/pol.20130268](https://doi.org/10.1257/pol.20130268)
+
+* Petersen, C., Reguant, M. & Segura, L. (2021) Measuring the Impact of Wind Power: Output- vs. Capacity-based Subsidies. [Work in progress](/materias/day1/Measuring_the_Impact_of_Wind_Power_WP.pdf)

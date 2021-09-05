@@ -31,7 +31,11 @@ The exercise will be based on the paper by Petersen, Reguant, and Segura (2021).
 
 * Abrell, J., Kosch, M., & Rausch, S. (2019). Carbon abatement with renewables: Evaluating wind and solar subsidies in Germany and Spain. Journal of Public Economics, 169, 172–202. [https://doi.org/10.1016/j.jpubeco.2018.11.007](https://doi.org/10.1016/j.jpubeco.2018.11.007)
 
+* Bushnell, J., & Novan, K. (2021). Setting with the Sun: The Impacts of Renewable Energy on Conventional Generation. Journal of the Association of Environmental and Resource Economists, 8(4), 759–796. [https://doi.org/10.1086/713249](https://doi.org/10.1086/713249)
+
 * Cullen, J. (2013). Measuring the environmental benefits of wind-generated electricity. American Economic Journal: Economic Policy, 5(4), 107–133. [https://doi.org/10.1257/pol.5.4.107](https://doi.org/10.1257/pol.5.4.107)
+
+* Gowrisankaran, G., Reynolds, S. S., & Samano, M. (2016). Intermittency and the value of renewable energy. Journal of Political Economy, 124(4), 1187–1234. [https://doi.org/10.1086/686733](https://doi.org/10.1086/686733)
 
 * Joskow, P. L. (2019). Challenges for wholesale electricity markets with intermittent renewable generation at scale: the US experience. Oxford Review of Economic Policy, 35(2), 291–331. [https://doi.org/10.1093/OXREP/GRZ001](https://doi.org/10.1093/OXREP/GRZ001)
 

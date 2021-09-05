@@ -32,3 +32,13 @@ In each **day page** you will find the necessary material:
 * [Day 3](menu3): Supply side II
 * [Day 4](menu4): Demand side I
 * [Day 5](menu5): Demand side II
+
+## Additional Julia resources
+
+* Quantitative Economics with Julia (macro focus) [https://julia.quantecon.org](https://julia.quantecon.org)
+
+* MIT Introduction to Computational Thinking (with Pluto live notebooks) [https://computationalthinking.mit.edu/Spring21/](https://computationalthinking.mit.edu/Spring21/)
+
+* PowerSystems.jl and other libraries - Julia libraries to build electricity models, developed at NREL [https://www.nrel.gov/analysis/siip.html](https://www.nrel.gov/analysis/siip.html)
+
+* A tutorial to learn JuMP (also referenced above) - [https://github.com/jump-dev/JuMPTutorials.jl](https://github.com/jump-dev/JuMPTutorials.jl)

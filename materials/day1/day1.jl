@@ -10,10 +10,8 @@ begin
 	using CSV
 	using Plots
 	using Binscatters
+	using FixedEffectModels
 end
-
-# ╔═╡ faad6d69-af92-44d1-a695-eb5672853d6d
-using FixedEffectModels
 
 # ╔═╡ ec2c5947-3b0b-4214-8c56-06c5cea7eee9
 md"""
@@ -30,14 +28,16 @@ The data have been collected from publicly available sources (Red Eléctrica de 
 # ╔═╡ ef70b7d4-0719-11ec-290f-9539c06bdd7e
 md"""
 
-We need to load packages in Julia, similar to the import function in Python or the library functionality in R. *Pluto* will install the libraries automatically, but generally they need to be installed as follows:
+We need to load packages in Julia, similar to the import function in Python or the library functionality in R. *Pluto* will install the libraries automatically, but in Julia we need to **install the libraries** as follows:
 
 ```
 using Pkg
 Pkg.add("LibraryName")
 ```
 
-Let's load the libraries we will use. Here we will be loading a bunch of libraries so that we can load the data and make some nice plot. 
+To **load the libraries**, we use the command `using`. 
+
+Here we will be loading a bunch of libraries so that we can load and use the data (`DataFrames`, `CSV`) and make some nice plots (`Plots`, `Binscatters`). We will also be running some fixed-effects regressions (`FixedEffectModels`).
 """
 
 # ╔═╡ a38335ed-32a3-4168-9cc4-a83af5fc02dd
@@ -99,6 +99,38 @@ begin
 		ylabel = "Wholesale price + system costs (EUR/MWh)")
 end
 
+# ╔═╡ 2d2f2a75-541f-4f8a-9b9b-c3929cd5478f
+md"""
+
+## Wind endogeneity
+
+One can estimate the effects of wind using a regression framework. However, it is important to keep in mind that wind production can be endogenous.
+
+In moments of very high forecasted wind, it is often the case that wind is discarded. This can create an endogeneity problem.
+
+"""
+
+# ╔═╡ 318e121d-2ccf-4fb6-a574-fc046d6711d4
+scatter(df.wind_forecast, df.wind, xlabel="Forecasted wind", ylabel="Wind", legend=false, title="Discarded wind")
+
+# ╔═╡ 7823271d-788c-4cb0-8892-e344d7f3b58d
+md"""
+
+We can examine the endogeneity problem in the context of assessing the impact of wind on reliability and other congestion costs ("system costs").
+
+In days of very high wind, measured wind production could be lower than expected, leading to downward bias in our estimates: a difficult day with lots of wind appears as a day with low levels of wind in the data.
+
+To address this issue, one can instrument wind production with forecasted wind.
+
+We will be running these regressions using the `FixedEffectModels` library.
+"""
+
+# ╔═╡ 2f123b31-ed84-4cb2-a399-e95d62f161c8
+reg(df, @formula(system_costs ~ wind + fe(year) + fe(month)))
+
+# ╔═╡ 27ce825a-53e9-4992-b31d-a3b5180941cf
+reg(df, @formula(system_costs ~ (wind ~ wind_forecast) + fe(year) + fe(month)))
+
 # ╔═╡ 35e0d327-2165-474d-85fc-79bee35ea86e
 md"""
 
@@ -159,37 +191,16 @@ begin
 		label="Post", seriestype = :linearfit)
 end
 
-# ╔═╡ 2d2f2a75-541f-4f8a-9b9b-c3929cd5478f
+# ╔═╡ 272c16a1-b169-483f-bd81-cd83fa415098
 md"""
 
-## Wind endogeneity
+## Follow-up exercises
 
-One can estimate the effects of wind using a regression framework. However, it is important to keep in mind that wind production can be endogenous.
+1. What is the environmental of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
 
-In moments of very high forecasted wind, it is often the case that wind is discarded. This can create an endogeneity problem.
+2. What is the correlation of wind and demand? How could that affect the valuation of wind power?
 
 """
-
-# ╔═╡ 318e121d-2ccf-4fb6-a574-fc046d6711d4
-scatter(df.wind_forecast, df.wind, xlabel="Forecasted wind", ylabel="Wind", legend=false, title="Discarded wind")
-
-# ╔═╡ 7823271d-788c-4cb0-8892-e344d7f3b58d
-md"""
-
-We can examine the endogeneity problem in the context of assessing the impact of wind on reliability and other congestion costs ("system costs").
-
-In days of very high wind, measured wind production could be lower than expected, leading to downward bias in our estimates: a difficult day with lots of wind appears as a day with low levels of wind in the data.
-
-To address this issue, one can instrument wind production with forecasted wind.
-
-We will be running these regressions using the `FixedEffectModels` library.
-"""
-
-# ╔═╡ 2f123b31-ed84-4cb2-a399-e95d62f161c8
-reg(df, @formula(system_costs ~ wind + fe(year) + fe(month)))
-
-# ╔═╡ 27ce825a-53e9-4992-b31d-a3b5180941cf
-reg(df, @formula(system_costs ~ (wind ~ wind_forecast) + fe(year) + fe(month)))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1165,7 +1176,7 @@ version = "0.9.1+5"
 # ╠═0bde0adc-136d-4aec-8e2b-3341555ad8c0
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
-# ╠═bfd872df-dc2c-473b-9536-eb5736b0ec9f
+# ╟─bfd872df-dc2c-473b-9536-eb5736b0ec9f
 # ╠═f6d3813c-a11f-48ee-9212-15a67c71cf4b
 # ╠═e0e57a26-ea5f-47ad-9d13-5492cf5af1c5
 # ╠═68429700-c94c-45f6-9765-53478aaed243
@@ -1173,7 +1184,6 @@ version = "0.9.1+5"
 # ╟─2d2f2a75-541f-4f8a-9b9b-c3929cd5478f
 # ╠═318e121d-2ccf-4fb6-a574-fc046d6711d4
 # ╟─7823271d-788c-4cb0-8892-e344d7f3b58d
-# ╠═faad6d69-af92-44d1-a695-eb5672853d6d
 # ╠═2f123b31-ed84-4cb2-a399-e95d62f161c8
 # ╠═27ce825a-53e9-4992-b31d-a3b5180941cf
 # ╟─35e0d327-2165-474d-85fc-79bee35ea86e
@@ -1182,5 +1192,6 @@ version = "0.9.1+5"
 # ╠═83f9dcff-43a2-4e0a-b93b-45ba30bc6849
 # ╟─124274ea-fda5-4736-92cb-9dbcefda15ff
 # ╠═67186641-0036-41a1-bd12-a75b5bc220c9
+# ╟─272c16a1-b169-483f-bd81-cd83fa415098
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -24,6 +24,8 @@ The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (202
 
 * Burlig, F., Knittel, C., Rapson, D., Reguant, M., & Wolfram, C. (2020). Machine Learning from Schools about Energy Efficiency. Journal of the Association of Environmental and Resource Economists, 7(6), 1181–1217. [https://doi.org/10.1086/710606](https://doi.org/10.1086/710606)
 
+* Christensen, P., Francisco, P., Myers, E., & Souza, M. (2021). Decomposing the Wedge between Projected and Realized Returns in Energy Efficiency Programs. The Review of Economics and Statistics, 1–46. [https://doi.org/10.1162/rest_a_01087](https://doi.org/10.1162/rest_a_01087)
+
 * Jessoe, K., & Rapson, D. (2014). Knowledge is (Less) power: Experimental evidence from residential energy use. American Economic Review. [https://doi.org/10.1257/aer.104.4.1417](https://doi.org/10.1257/aer.104.4.1417)
 
 * Jessoe, K., & Rapson, D. (2015). Commercial and Industrial Demand Response Under Mandatory Time-of-Use Electricity Pricing. Journal of Industrial Economics, 63(3), 397–421. [https://doi.org/10.1111/joie.12082](https://doi.org/10.1111/joie.12082)

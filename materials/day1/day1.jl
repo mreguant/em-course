@@ -12,6 +12,9 @@ begin
 	using Binscatters
 end
 
+# ╔═╡ faad6d69-af92-44d1-a695-eb5672853d6d
+using FixedEffectModels
+
 # ╔═╡ ec2c5947-3b0b-4214-8c56-06c5cea7eee9
 md"""
 # Day 1: Introduction
@@ -53,7 +56,9 @@ end
 # ╔═╡ bfd872df-dc2c-473b-9536-eb5736b0ec9f
 md"""
 
-We will be plotting the impacts of wind on several outcomes of interest:
+## The impacts of wind: visual exploration
+
+We will be plotting the **impacts of wind** on several outcomes of interest:
 * Emissions
 * Wholesale prices
 * System costs
@@ -94,18 +99,112 @@ begin
 		ylabel = "Wholesale price + system costs (EUR/MWh)")
 end
 
+# ╔═╡ 35e0d327-2165-474d-85fc-79bee35ea86e
+md"""
+
+## A policy change 
+
+The paper explores the **role of market design** in affecting the value of wind. The market moved away from subsidies that are paid based on production to subsidies that are based on installed capacity (subject to minimum performance requirments).
+
+In the wholesale market, this implies that renewables no longer have an incentive to produce when prices are very low, e.g., as in California or Texas, in which prices are often zero or negative. 
+
+We will split the data in two to examine the change in the distribution of wholesale prices around the policy change.
+
+**Note:** This is an event study, so there are other changes happening in the market. The idea here is to show major effects of the policy, but a proper quantification requires more explicit control of confounders.
+
+"""
+
+# ╔═╡ 9a6f5569-ff56-4f13-9ab4-842ac8ae1f96
+begin
+	df.policy = (((df.year .> 2014) .| ((df.year.==2014) .& (df.month .> 5))));
+	dfpre = subset(df, :policy => ByRow(==(0)));
+	dfpost = subset(df, :policy => ByRow(==(1)));
+	
+	# focus only on 2013-2015 data
+	dfpre = subset(dfpre, :year => ByRow(>(2012)));
+	dfpost = subset(dfpost, :year => ByRow(<(2016)));
+	
+	histogram(dfpre.wholesale_price, label="Pre")
+	histogram!(dfpost.wholesale_price, label="Post")
+end
+
+# ╔═╡ 102ae65a-ec4b-4bc3-9b4f-65c9d5df6fdd
+md"""
+
+The policy change appeared to reduce system costs in the market. This could be due to the challenges of dispatching the market in the presence of zero prices, which lead to several strategic distortions.
+
+We can plot system costs before and after the change.
+
+"""
+
+# ╔═╡ 83f9dcff-43a2-4e0a-b93b-45ba30bc6849
+begin
+	binscatter(dfpre, @formula(system_costs ~ wind_forecast), 10, 
+		label="Pre", seriestype = :linearfit)
+	binscatter!(dfpost, @formula(system_costs ~ wind_forecast), 10,
+		label="Post", seriestype = :linearfit)
+end
+
+# ╔═╡ 124274ea-fda5-4736-92cb-9dbcefda15ff
+md"""
+
+Consumers were still worse off due to the increase in prices. Wind price reduction effect diminished.
+"""
+
+# ╔═╡ 67186641-0036-41a1-bd12-a75b5bc220c9
+begin
+	binscatter(dfpre, @formula(total_price ~ wind_forecast), 10, 
+		label="Pre", seriestype = :linearfit)
+	binscatter!(dfpost, @formula(total_price ~ wind_forecast), 10, 
+		label="Post", seriestype = :linearfit)
+end
+
+# ╔═╡ 2d2f2a75-541f-4f8a-9b9b-c3929cd5478f
+md"""
+
+## Wind endogeneity
+
+One can estimate the effects of wind using a regression framework. However, it is important to keep in mind that wind production can be endogenous.
+
+In moments of very high forecasted wind, it is often the case that wind is discarded. This can create an endogeneity problem.
+
+"""
+
+# ╔═╡ 318e121d-2ccf-4fb6-a574-fc046d6711d4
+scatter(df.wind_forecast, df.wind, xlabel="Forecasted wind", ylabel="Wind", legend=false, title="Discarded wind")
+
+# ╔═╡ 7823271d-788c-4cb0-8892-e344d7f3b58d
+md"""
+
+We can examine the endogeneity problem in the context of assessing the impact of wind on reliability and other congestion costs ("system costs").
+
+In days of very high wind, measured wind production could be lower than expected, leading to downward bias in our estimates: a difficult day with lots of wind appears as a day with low levels of wind in the data.
+
+To address this issue, one can instrument wind production with forecasted wind.
+
+We will be running these regressions using the `FixedEffectModels` library.
+"""
+
+# ╔═╡ 2f123b31-ed84-4cb2-a399-e95d62f161c8
+reg(df, @formula(system_costs ~ wind + fe(year) + fe(month)))
+
+# ╔═╡ 27ce825a-53e9-4992-b31d-a3b5180941cf
+reg(df, @formula(system_costs ~ (wind ~ wind_forecast) + fe(year) + fe(month)))
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Binscatters = "deae81f5-4416-4700-a781-f7a18782af9b"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FixedEffectModels = "9d5cd8c9-2029-5cab-9928-427838db53e3"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 Binscatters = "~0.2.1"
 CSV = "~0.8.5"
 DataFrames = "~1.2.2"
+FixedEffectModels = "~1.6.4"
 Plots = "~1.21.3"
 """
 
@@ -1066,10 +1165,22 @@ version = "0.9.1+5"
 # ╠═0bde0adc-136d-4aec-8e2b-3341555ad8c0
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
-# ╟─bfd872df-dc2c-473b-9536-eb5736b0ec9f
+# ╠═bfd872df-dc2c-473b-9536-eb5736b0ec9f
 # ╠═f6d3813c-a11f-48ee-9212-15a67c71cf4b
 # ╠═e0e57a26-ea5f-47ad-9d13-5492cf5af1c5
 # ╠═68429700-c94c-45f6-9765-53478aaed243
 # ╠═f3f66300-a9b4-4a84-8281-d83820b098da
+# ╟─2d2f2a75-541f-4f8a-9b9b-c3929cd5478f
+# ╠═318e121d-2ccf-4fb6-a574-fc046d6711d4
+# ╟─7823271d-788c-4cb0-8892-e344d7f3b58d
+# ╠═faad6d69-af92-44d1-a695-eb5672853d6d
+# ╠═2f123b31-ed84-4cb2-a399-e95d62f161c8
+# ╠═27ce825a-53e9-4992-b31d-a3b5180941cf
+# ╟─35e0d327-2165-474d-85fc-79bee35ea86e
+# ╠═9a6f5569-ff56-4f13-9ab4-842ac8ae1f96
+# ╟─102ae65a-ec4b-4bc3-9b4f-65c9d5df6fdd
+# ╠═83f9dcff-43a2-4e0a-b93b-45ba30bc6849
+# ╟─124274ea-fda5-4736-92cb-9dbcefda15ff
+# ╠═67186641-0036-41a1-bd12-a75b5bc220c9
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

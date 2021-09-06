@@ -9,7 +9,7 @@ begin
 	using DataFrames
 	using CSV
 	using JuMP
-	using Ipopt,GLPK, Cbc
+	using Ipopt, Cbc
 	using Clustering
 	using Plots
 	using StatsPlots
@@ -34,14 +34,11 @@ md"""
 
 We first load relevant libraries.
 
-Compared to day 1, we will be adding the libraries `JuMP` and the solvers `Ipopt` and `GLPK`. We will also be using the clustering library `Clustering`.
+Compared to day 1, we will be adding the libraries `JuMP` and the solvers `Ipopt` (non-linear solver) and `Cbc` (mixed linear integer solver). We will also be using the clustering library `Clustering`.
 
-**Note:** I often prefer to use a commercial solver (Gurobi) which is available under an academic license. I use solvers that are readily available here for simplicity and to ensure that everyone can access the code.
+**Note:** I often prefer to use commercial solvers (Gurobi or CPLEX), which are available under an academic license. I use solvers that are readily available here without a license for simplicity and to ensure that everyone can access the code.
 
 """
-
-# ╔═╡ e828df38-7f96-4f85-8cc3-777a9b871d20
-
 
 # ╔═╡ a38335ed-32a3-4168-9cc4-a83af5fc02dd
 md"""
@@ -445,7 +442,6 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
 Ipopt = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -459,7 +455,6 @@ CSV = "~0.8.5"
 Cbc = "~0.8.1"
 Clustering = "~0.14.2"
 DataFrames = "~1.2.2"
-GLPK = "~0.14.12"
 Ipopt = "~0.7.0"
 JuMP = "~0.21.10"
 Plots = "~1.21.3"
@@ -817,22 +812,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcu
 git-tree-sha1 = "dba1e8614e98949abfa60480b13653813d8f0157"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.5+0"
-
-[[GLPK]]
-deps = ["BinaryProvider", "CEnum", "GLPK_jll", "Libdl", "MathOptInterface"]
-git-tree-sha1 = "dbf0202fa85903c5824452ab5497dbc22404c76a"
-uuid = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
-version = "0.14.12"
-
-[[GLPK_jll]]
-deps = ["Artifacts", "GMP_jll", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "01de09b070d4b8e3e1250c6542e16ed5cad45321"
-uuid = "e8aa6df9-e6ca-548a-97ff-1f85fc5b8b98"
-version = "5.0.0+0"
-
-[[GMP_jll]]
-deps = ["Artifacts", "Libdl"]
-uuid = "781609d7-10c4-51f6-84f2-b8444358ff6d"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "Serialization", "Sockets", "Test", "UUIDs"]
@@ -1726,7 +1705,6 @@ version = "0.9.1+5"
 # ╟─ec2c5947-3b0b-4214-8c56-06c5cea7eee9
 # ╟─ef70b7d4-0719-11ec-290f-9539c06bdd7e
 # ╠═0bde0adc-136d-4aec-8e2b-3341555ad8c0
-# ╠═e828df38-7f96-4f85-8cc3-777a9b871d20
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
 # ╠═4f4da19d-d9a4-4880-aefe-0335bc487515

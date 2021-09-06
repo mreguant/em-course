@@ -8,11 +8,17 @@ date = Date(2021, 7, 9)
 
 :warning: Materials under construction! Exercise materials not yet available.
 
+In the second lecture, we will talk about how to model electricity markets using mathematical programming tools. 
+
+In the practical session, we will get familiar with a dataset of electricity market hourly data from California, learn about how to simplify the data using clustering techniques, and set up an economic model of a simple electricity market.
+
 ## Lecture
+
+* **Slides**: <!--#[day1.pdf](/materials/day1/day1.pdf)-->
 
 ## Practical exercise: A model of the electricity sector
 
-The exercise will be based on the paper by Reguant (2020). Reading the paper in advance is encouraged.
+The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
 
 * **Exercise file**: [day2.jl](/materials/day2/day2.jl)
 

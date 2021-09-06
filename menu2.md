@@ -35,4 +35,5 @@ The exercise will be based on the paper by Reguant (2019), "The Efficiency and S
 
 * Ito, K., & Reguant, M. (2016). Sequential markets, market power, and arbitrage. American Economic Review, 106(7), 1921–1957. [https://doi.org/10.1257/aer.20141529](https://doi.org/10.1257/aer.20141529)
 
+* Kellogg, R., & Reguant, M. (2021). Energy and Environmental Markets, Industrial Organization, and Regulation, in preparation for Handbook of Industrial Organization, [working paper](/materials/day2/Handbook_IO_EEE.pdf)
 * Reguant, M. (2019). The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies. Journal of the Association of Environmental and Resource Economists, 6(S1), S129–S168. [https://doi.org/10.1086/701190](https://doi.org/10.1086/701190)

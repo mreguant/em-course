@@ -22,7 +22,7 @@ The exercise will be based on the paper by Reguant (2019), "The Efficiency and S
 
 * **Exercise file**: [day2.jl](/materials/day2/day2.jl)
 
-* **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv)
+* **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv), [data_technology_simple.csv](/materials/day2/data_technology_simple.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file and the data CSV file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. 

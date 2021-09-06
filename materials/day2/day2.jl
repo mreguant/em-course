@@ -67,6 +67,9 @@ begin
 	first(df, 5)
 end
 
+# ╔═╡ 4f4da19d-d9a4-4880-aefe-0335bc487515
+df
+
 # ╔═╡ 6df1c2bb-7c01-4b78-b370-4a5232d5d4e7
 md"""
 
@@ -90,7 +93,10 @@ begin
 	R = kmeans(Xs, n);
 	
 	# Get the cluster centers rescaling again
-	M = R.centers .* repeat(std(X,dims=2),1,n) .+ repeat(mean(X,dims=2),1,n); 
+	M = R.centers .* repeat(std(X,dims=2),1,n) .+ repeat(mean(X,dims=2),1,n);  
+	
+	# R = kmeans(X, n);
+	# M = R.centers; 
 end
 
 # ╔═╡ ed2bb458-db38-41b1-959a-634cd076170b
@@ -211,7 +217,7 @@ begin
 end
 
 # ╔═╡ 8d4c60c4-85ae-4790-86de-0bbd8f19e165
-tech = CSV.read("data_technology_simple.csv", DataFrame);
+tech = CSV.read("data_technology_simple.csv", DataFrame)
 
 # ╔═╡ 7871247f-878e-43a0-a004-ff3f3d44c397
 begin
@@ -1723,6 +1729,7 @@ version = "0.9.1+5"
 # ╠═e828df38-7f96-4f85-8cc3-777a9b871d20
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
+# ╠═4f4da19d-d9a4-4880-aefe-0335bc487515
 # ╟─6df1c2bb-7c01-4b78-b370-4a5232d5d4e7
 # ╠═d70ca10c-01b9-42c2-9d62-d4da6285f1ba
 # ╠═ed2bb458-db38-41b1-959a-634cd076170b

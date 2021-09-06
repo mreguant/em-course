@@ -18,6 +18,9 @@ The exercise will be based on the paper by Reguant (2020). Reading the paper in 
 
 * **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv)
 
+<!-- ## Homework -->
+> :exclamation: Save the exercise Julia file and the data CSV file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. 
+
 ## References and readings
 
 * Bushnell, J. (2011). Building blocks: Investment in renewable and nonrenewable technologies. In Harnessing Renewable Energy in Electric Power Systems: Theory, Practice, Policy: Vol. WP-202R (pp. 159–180). [https://doi.org/10.4324/9781936331864](https://doi.org/10.4324/9781936331864)

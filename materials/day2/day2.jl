@@ -9,11 +9,12 @@ begin
 	using DataFrames
 	using CSV
 	using JuMP
-	using Ipopt
+	using Ipopt,GLPK, Cbc
 	using Clustering
 	using Plots
 	using StatsPlots
 	using Statistics, StatsBase
+	using Printf
 end
 
 # ╔═╡ ec2c5947-3b0b-4214-8c56-06c5cea7eee9
@@ -33,11 +34,14 @@ md"""
 
 We first load relevant libraries.
 
-Compared to day 1, we will be adding the libraries `JuMP` and the solver `Ipopt`. We will also be using the clustering library `Clustering`.
+Compared to day 1, we will be adding the libraries `JuMP` and the solvers `Ipopt` and `GLPK`. We will also be using the clustering library `Clustering`.
 
 **Note:** I often prefer to use a commercial solver (Gurobi) which is available under an academic license. I use solvers that are readily available here for simplicity and to ensure that everyone can access the code.
 
 """
+
+# ╔═╡ e828df38-7f96-4f85-8cc3-777a9b871d20
+
 
 # ╔═╡ a38335ed-32a3-4168-9cc4-a83af5fc02dd
 md"""
@@ -78,7 +82,7 @@ Here we will be using a clustering algorithm to come up with a (much) smaller sy
 
 # ╔═╡ d70ca10c-01b9-42c2-9d62-d4da6285f1ba
 begin
-	n = 200
+	n = 100
 	X = transpose(Array(select(df,Between(:price,:hydronuc))));
 	
 	# We scale variables to improve kmeans performance
@@ -117,7 +121,7 @@ end
 # ╔═╡ 3d72810a-e19f-4d04-8544-ef97c9044691
 md"""
 
-It is also relatively matched for the case for solar, although it is harder there.
+It is also relatively well matched for the case for solar, although it is harder there.
 
 """
 
@@ -185,23 +189,271 @@ Here we will be simply building a simple model of market clearing.
 
 """
 
+# ╔═╡ 505ba189-de94-4bb3-b7e6-860805951c03
+md""" 
+
+Before building the model, we define some model parameters related to:
+
+* Elasticity of demand and imports
+
+* Number and costs of different technologies (loaded from a small dataset)
+
+"""
+
+# ╔═╡ 879f69f9-34fa-4afb-9fa7-4cdd0be94920
+begin
+	techs = CSV.read("data_technology.csv", DataFrame);
+	techs = techs[[1:4;6:7],:]
+	techs = select(techs,[:techname,:heatrate,:heatrate2,:capUB,:thermal,:e,:e2])
+	techs.c = techs.heatrate + techs.heatrate.*techs.thermal.*(3.5-1.0)
+	techs.c2 = techs.heatrate2 + techs.heatrate2.*techs.thermal.*(3.5-1.0)
+	CSV.write("data_technology_simple.csv", techs)
+end
+
+# ╔═╡ 8d4c60c4-85ae-4790-86de-0bbd8f19e165
+tech = CSV.read("data_technology_simple.csv", DataFrame);
+
+# ╔═╡ 7871247f-878e-43a0-a004-ff3f3d44c397
+begin
+	# Re-scaling 
+	dfclust.weights = dfclust.weights / sum(dfclust.weights);
+	
+	# Here only one demand type to make it easier
+	dfclust.demand = dfclust.q_residential + dfclust.q_commercial + dfclust.q_industrial;
+	
+    # Calibrate demand based on elasticities (using 0.2)
+	elas = [.1, .2, .5, .3];
+	dfclust.b = elas[1] * dfclust.demand ./ dfclust.price;  # slope
+	dfclust.a = dfclust.demand + dfclust.b .* dfclust.price;  # intercept
+
+	# Calibrate imports (using elas 0.3)
+    dfclust.bm = elas[4] * dfclust.imports ./ dfclust.price;  # slope
+    dfclust.am = dfclust.imports - dfclust.bm .* dfclust.price;  # intercept
+end
+
+# ╔═╡ 304789b8-92cd-4a9e-996a-84e2ce0bdec2
+md"""
+
+We are now ready to clear the market. We will **minimize costs** using a non-linear solver.
+
+We will then consider an approach **based on FOC**, which is useful to extend to strategic firms as in Bushnell, Mansur, and Saravia (2008) and Ito and Reguant (2016).
+
+In perfect competition, the two approaches should be equivalent!
+
+"""
+
+# ╔═╡ 8bc65067-4ce0-4484-ab59-b3eebd4e56d6
+## Clear market based on cost minimization
+function clear_market_min(data::DataFrame, tech::DataFrame; 
+		wind_gw = 5.0, solar_gw = 2.0)
+	
+	# We declare a model
+    model = Model(
+		optimizer_with_attributes(
+            Ipopt.Optimizer)
+        );
+
+    # Set useful indexes
+    I = nrow(tech);  # number of techs + wind and solar
+    T = nrow(data);  # number of periods
+    S = 1;  # we will only be using one sector to keep things simple
+
+    # Variables to solve for
+    @variable(model, price[1:T]);
+ 	@variable(model, demand[1:T]);
+	@variable(model, imports[1:T]);
+	@variable(model, quantity[1:T, 1:I] >= 0);
+
+	# Maximize welfare including imports costs
+	@objective(model, Max, sum((data.a[t] - demand[t]) * demand[t] / data.b[t] 
+		+ demand[t]^2/(2*data.b[t])
+		- sum(tech.c[i] * quantity[t,i] 
+					+ tech.c2[i] * quantity[t,i]^2/2 for i=1:I)
+		- (imports[t] - data.am[t])^2/(2 * data.bm[t]) for t=1:T));
+ 
+	# Market clearing
+	@constraint(model, [t=1:T], 
+		demand[t] == data.a[t] - data.b[t] * price[t]);
+	@constraint(model, [t=1:T], 
+		imports[t] == data.am[t] + data.bm[t] * price[t]);
+	@constraint(model, [t=1:T], 
+		demand[t] == sum(quantity[t,i] for i=1:I) + imports[t]);
+	
+	# Constraints on output
+	@constraint(model, [t=1:T], 
+		quantity[t,1] <= data.hydronuc[t]);	
+	@constraint(model, [t=1:T,i=2:4], 
+		quantity[t,i] <= tech[i,"capUB"]);
+	@constraint(model, [t=1:T], 
+		quantity[t,5] <= wind_gw * data.wind_cap[t]);
+	@constraint(model, [t=1:T], 
+		quantity[t,6] <= solar_gw * data.solar_cap[t]);
+	
+	optimize!(model);
+	
+	status = @sprintf("%s", JuMP.termination_status(model));
+	
+	if (status=="LOCALLY_SOLVED")
+		p = JuMP.value.(price);
+		avg_price = sum(p[t] * data.weights[t] for t=1:T);
+		q = JuMP.value.(quantity);
+		imp = JuMP.value.(imports);
+		d = JuMP.value.(demand);
+		cost = sum(data.weights[t] * (sum(tech.c[i] * q[t,i] 
+				+ tech.c2[i] * q[t,i]^2 / 2 for i=1:I) 
+				+ (imp[t] - data.am[t])^2/(2 * data.bm[t])) for t=1:T);
+		results = Dict("status" => @sprintf("%s",JuMP.termination_status(model)),
+            "avg_price" => avg_price,
+			"price" => p,
+			"quantity" => q,
+			"imports" => imp,
+			"demand" => d,
+			"cost" => cost);
+		return results
+	else
+		results = Dict("status" => @sprintf("%s",JuMP.termination_status(model)));
+		return results
+	end
+	
+end
+
+# ╔═╡ 7400ca77-a18f-4a46-a2d4-cfa527edfcb2
+results_min = clear_market_min(dfclust, tech);
+
+# ╔═╡ 3b1665be-d1e9-4da5-b59a-b4fb31d1662e
+results_min["avg_price"]
+
+# ╔═╡ b0fd10a3-25e7-40a9-8368-1dc31b60ca25
+results_min["cost"]
+
+# ╔═╡ 0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
+## Clear market based on first-order conditions
+function clear_market_foc(data::DataFrame, tech::DataFrame; 
+		wind_gw = 5.0, solar_gw = 2.0)
+	
+	# We declare a model
+    model = Model(
+		optimizer_with_attributes(
+            Cbc.Optimizer)
+        );
+
+    # Set useful indexes
+    I = nrow(tech);  # number of techs + wind and solar
+    T = nrow(data);  # number of periods
+    S = 1;  # we will only be using one sector to keep things simple
+
+    # Variables to solve for
+    @variable(model, price[1:T]);
+ 	@variable(model, demand[1:T]);
+	@variable(model, imports[1:T]);
+	@variable(model, quantity[1:T, 1:I] >= 0);
+	@variable(model, shadow[1:T, 1:I] >= 0);  # price wedge if at capacity
+	@variable(model, u1[1:T, 1:I], Bin);  # if tech used
+	@variable(model, u2[1:T, 1:I], Bin);  # if tech at max
+
+	# Market clearing
+	@constraint(model, [t=1:T], 
+		demand[t] == data.a[t] - data.b[t] * price[t]);
+	@constraint(model, [t=1:T], 
+		imports[t] == data.am[t] + data.bm[t] * price[t]);
+	@constraint(model, [t=1:T], 
+		demand[t] == sum(quantity[t,i] for i=1:I) + imports[t]);
+	
+	# Capacity constraints
+	@constraint(model, [t=1:T], 
+		quantity[t,1] <= u1[t,1] * data.hydronuc[t]);
+	@constraint(model, [t=1:T,i=2:4], 
+		quantity[t,i] <= u1[t,i] * tech[i,"capUB"]);
+	@constraint(model, [t=1:T], 
+		quantity[t,5] <= u1[t,5] * wind_gw * data.wind_cap[t]);
+	@constraint(model, [t=1:T], 
+		quantity[t,6] <= u1[t,6] * solar_gw * data.solar_cap[t]);
+
+	@constraint(model, [t=1:T], 
+		quantity[t,1] >= u2[t,1] * data.hydronuc[t]);
+	@constraint(model, [t=1:T,i=2:4], 
+		quantity[t,i] >= u2[t,i] * tech[i,"capUB"]);
+	@constraint(model, [t=1:T], 
+		quantity[t,5] >= u2[t,5] * wind_gw * data.wind_cap[t]);
+	@constraint(model, [t=1:T], 
+		quantity[t,6] >= u2[t,6] * solar_gw * data.solar_cap[t]);
+	
+	# Constraints on optimality 
+	M = 1e3;
+	@constraint(model, [t=1:T,i=1:I],
+		price[t] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
+		>= -M * (1-u1[t,i]));
+	@constraint(model, [t=1:T,i=1:I],
+		price[t] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
+		<= 0.0);
+	@constraint(model, [t=1:T,i=1:I], shadow[t,i] <= M*u2[t,i]);
+	@constraint(model, [t=1:T,i=1:I], u1[t,i] >= u2[t,i]);		
+	
+	optimize!(model);
+	
+	status = @sprintf("%s", JuMP.termination_status(model));
+	
+	if (status=="OPTIMAL")
+		p = JuMP.value.(price);
+		avg_price = sum(p[t] * data.weights[t] for t=1:T);		
+		q = JuMP.value.(quantity);
+		imp = JuMP.value.(imports);
+		d = JuMP.value.(demand);
+		cost = sum(data.weights[t] * (sum(tech.c[i] * q[t,i] 
+				+ tech.c2[i] * q[t,i]^2 / 2 for i=1:I) 
+				+ (imp[t] - data.am[t])^2/(2 * data.bm[t])) for t=1:T);
+		shadow = JuMP.value.(shadow);
+		u1 = JuMP.value.(u1);
+		u2 = JuMP.value.(u2);
+		results = Dict("status" => @sprintf("%s",JuMP.termination_status(model)),
+            "avg_price" => avg_price,
+			"price" => p,
+			"quantity" => q,
+			"imports" => imp,
+			"demand" => d,
+			"cost" => cost,
+			"shadow" => shadow,
+			"u1" => u1,
+			"u2" => u2);
+		return results
+	else
+		results = Dict("status" => @sprintf("%s",JuMP.termination_status(model)));
+		return results
+	end
+	
+end
+
+# ╔═╡ 8e135ba9-3e4f-4ef5-98cd-a807146f6af7
+results_foc = clear_market_foc(dfclust, tech);
+
+# ╔═╡ e86d243e-fac9-45b1-810a-231e3ca93c2d
+results_foc["avg_price"]
+
+# ╔═╡ e9638f3f-4b3e-4349-8dca-0570002b8d3f
+results_foc["cost"]
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Cbc = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
 Ipopt = "b6b21f68-93f8-5de0-b562-5493be1d77c9"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 CSV = "~0.8.5"
+Cbc = "~0.8.1"
 Clustering = "~0.14.2"
 DataFrames = "~1.2.2"
+GLPK = "~0.14.12"
 Ipopt = "~0.7.0"
 JuMP = "~0.21.10"
 Plots = "~1.21.3"
@@ -276,6 +528,11 @@ git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
+[[CEnum]]
+git-tree-sha1 = "215a9aa4a1f23fbd05b92769fdd62559488d70e9"
+uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
+version = "0.4.1"
+
 [[CSV]]
 deps = ["Dates", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode"]
 git-tree-sha1 = "b83aa3f513be680454437a0eee21001607e5d983"
@@ -294,11 +551,35 @@ git-tree-sha1 = "f641eb0a4f00c343bbc32346e1217b86f3ce9dad"
 uuid = "49dc2e85-a5d0-5ad3-a950-438e2897f1b9"
 version = "0.5.1"
 
+[[Cbc]]
+deps = ["BinaryProvider", "CEnum", "Cbc_jll", "Libdl", "MathOptInterface", "SparseArrays"]
+git-tree-sha1 = "98e3692f90b26a340f32e17475c396c3de4180de"
+uuid = "9961bab8-2fa3-5c5a-9d89-47fab24efd76"
+version = "0.8.1"
+
+[[Cbc_jll]]
+deps = ["ASL_jll", "Artifacts", "Cgl_jll", "Clp_jll", "CoinUtils_jll", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "Osi_jll", "Pkg"]
+git-tree-sha1 = "7693a7ca006d25e0d0097a5eee18ce86368e00cd"
+uuid = "38041ee0-ae04-5750-a4d2-bb4d0d83d27d"
+version = "200.1000.500+1"
+
+[[Cgl_jll]]
+deps = ["Artifacts", "Clp_jll", "CoinUtils_jll", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Osi_jll", "Pkg"]
+git-tree-sha1 = "b5557f48e0e11819bdbda0200dbfa536dd12d9d9"
+uuid = "3830e938-1dd0-5f3e-8b8e-b3ee43226782"
+version = "0.6000.200+0"
+
 [[ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "bdc0937269321858ab2a4f288486cb258b9a0af7"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 version = "1.3.0"
+
+[[Clp_jll]]
+deps = ["Artifacts", "CoinUtils_jll", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "METIS_jll", "MUMPS_seq_jll", "OpenBLAS32_jll", "Osi_jll", "Pkg"]
+git-tree-sha1 = "5e4f9a825408dc6356e6bf1015e75d2b16250ec8"
+uuid = "06985876-5285-5a41-9fcb-8948a742cc53"
+version = "100.1700.600+0"
 
 [[Clustering]]
 deps = ["Distances", "LinearAlgebra", "NearestNeighbors", "Printf", "SparseArrays", "Statistics", "StatsBase"]
@@ -317,6 +598,12 @@ deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
 version = "0.7.0"
+
+[[CoinUtils_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "Pkg"]
+git-tree-sha1 = "9b4a8b1087376c56189d02c3c1a48a0bba098ec2"
+uuid = "be027038-0da8-5614-b30d-e42594cb92df"
+version = "2.11.4+2"
 
 [[ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
@@ -524,6 +811,22 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcu
 git-tree-sha1 = "dba1e8614e98949abfa60480b13653813d8f0157"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.5+0"
+
+[[GLPK]]
+deps = ["BinaryProvider", "CEnum", "GLPK_jll", "Libdl", "MathOptInterface"]
+git-tree-sha1 = "dbf0202fa85903c5824452ab5497dbc22404c76a"
+uuid = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
+version = "0.14.12"
+
+[[GLPK_jll]]
+deps = ["Artifacts", "GMP_jll", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "01de09b070d4b8e3e1250c6542e16ed5cad45321"
+uuid = "e8aa6df9-e6ca-548a-97ff-1f85fc5b8b98"
+version = "5.0.0+0"
+
+[[GMP_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "781609d7-10c4-51f6-84f2-b8444358ff6d"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "Serialization", "Sockets", "Test", "UUIDs"]
@@ -917,6 +1220,12 @@ version = "1.3.2+0"
 git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.4.1"
+
+[[Osi_jll]]
+deps = ["Artifacts", "CoinUtils_jll", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS32_jll", "Pkg"]
+git-tree-sha1 = "6a9967c4394858f38b7fc49787b983ba3847e73d"
+uuid = "7da25872-d9ce-5375-a4d3-7a845f58efdd"
+version = "0.108.6+2"
 
 [[PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1411,6 +1720,7 @@ version = "0.9.1+5"
 # ╟─ec2c5947-3b0b-4214-8c56-06c5cea7eee9
 # ╟─ef70b7d4-0719-11ec-290f-9539c06bdd7e
 # ╠═0bde0adc-136d-4aec-8e2b-3341555ad8c0
+# ╠═e828df38-7f96-4f85-8cc3-777a9b871d20
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
 # ╟─6df1c2bb-7c01-4b78-b370-4a5232d5d4e7
@@ -1429,5 +1739,18 @@ version = "0.9.1+5"
 # ╠═30be3f0f-1fc7-48b8-be62-6d3a73d48cab
 # ╠═d04f97b5-07bc-4907-922a-1f838547d93f
 # ╟─0c8f9b70-d3c5-4a83-8020-e48f35fb48c4
+# ╟─505ba189-de94-4bb3-b7e6-860805951c03
+# ╟─879f69f9-34fa-4afb-9fa7-4cdd0be94920
+# ╠═8d4c60c4-85ae-4790-86de-0bbd8f19e165
+# ╠═7871247f-878e-43a0-a004-ff3f3d44c397
+# ╟─304789b8-92cd-4a9e-996a-84e2ce0bdec2
+# ╠═8bc65067-4ce0-4484-ab59-b3eebd4e56d6
+# ╠═7400ca77-a18f-4a46-a2d4-cfa527edfcb2
+# ╠═3b1665be-d1e9-4da5-b59a-b4fb31d1662e
+# ╠═b0fd10a3-25e7-40a9-8368-1dc31b60ca25
+# ╠═0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
+# ╠═8e135ba9-3e4f-4ef5-98cd-a807146f6af7
+# ╠═e86d243e-fac9-45b1-810a-231e3ca93c2d
+# ╠═e9638f3f-4b3e-4349-8dca-0570002b8d3f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

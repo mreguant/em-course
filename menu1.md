@@ -43,4 +43,4 @@ The exercise will be based on the paper by Petersen, Reguant, and Segura (2021).
 
 * Novan, K. (2015). Valuing the Wind: Renewable Energy Policies and Air Pollution Avoided. American Economic Journal: Economic Policy, 7(3), 291–326. [https://doi.org/10.1257/pol.20130268](https://doi.org/10.1257/pol.20130268)
 
-* Petersen, C., Reguant, M. & Segura, L. (2021) Measuring the Impact of Wind Power: Output- vs. Capacity-based Subsidies. [Work in progress](/materias/day1/Measuring_the_Impact_of_Wind_Power_WP.pdf)
+* Petersen, C., Reguant, M. & Segura, L. (2021) Measuring the Impact of Wind Power: Output- vs. Capacity-based Subsidies. [Work in progress](/materials/day1/Measuring_the_Impact_of_Wind_Power_WP.pdf)

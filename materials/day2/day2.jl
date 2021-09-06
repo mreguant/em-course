@@ -224,7 +224,7 @@ begin
 	# Here only one demand type to make it easier
 	dfclust.demand = dfclust.q_residential + dfclust.q_commercial + dfclust.q_industrial;
 	
-    # Calibrate demand based on elasticities (using 0.2)
+    # Calibrate demand based on elasticities (using 0.1 here as only one final demand)
 	elas = [.1, .2, .5, .3];
 	dfclust.b = elas[1] * dfclust.demand ./ dfclust.price;  # slope
 	dfclust.a = dfclust.demand + dfclust.b .* dfclust.price;  # intercept
@@ -241,7 +241,7 @@ We are now ready to clear the market. We will **minimize costs** using a non-lin
 
 We will then consider an approach **based on FOC**, which is useful to extend to strategic firms as in Bushnell, Mansur, and Saravia (2008) and Ito and Reguant (2016).
 
-In perfect competition, the two approaches should be equivalent!
+In perfect competition, the two approaches should be equivalent--and they are in my computer!
 
 """
 
@@ -257,7 +257,7 @@ function clear_market_min(data::DataFrame, tech::DataFrame;
         );
 
     # Set useful indexes
-    I = nrow(tech);  # number of techs + wind and solar
+    I = nrow(tech);  # number of techs
     T = nrow(data);  # number of periods
     S = 1;  # we will only be using one sector to keep things simple
 
@@ -292,6 +292,7 @@ function clear_market_min(data::DataFrame, tech::DataFrame;
 	@constraint(model, [t=1:T], 
 		quantity[t,6] <= solar_gw * data.solar_cap[t]);
 	
+	# Solve model
 	optimize!(model);
 	
 	status = @sprintf("%s", JuMP.termination_status(model));
@@ -341,7 +342,7 @@ function clear_market_foc(data::DataFrame, tech::DataFrame;
         );
 
     # Set useful indexes
-    I = nrow(tech);  # number of techs + wind and solar
+    I = nrow(tech);  # number of techs
     T = nrow(data);  # number of periods
     S = 1;  # we will only be using one sector to keep things simple
 
@@ -392,6 +393,7 @@ function clear_market_foc(data::DataFrame, tech::DataFrame;
 	@constraint(model, [t=1:T,i=1:I], shadow[t,i] <= M*u2[t,i]);
 	@constraint(model, [t=1:T,i=1:I], u1[t,i] >= u2[t,i]);		
 	
+	# Solve model
 	optimize!(model);
 	
 	status = @sprintf("%s", JuMP.termination_status(model));
@@ -434,6 +436,19 @@ results_foc["avg_price"]
 
 # ╔═╡ e9638f3f-4b3e-4349-8dca-0570002b8d3f
 results_foc["cost"]
+
+# ╔═╡ c0bdd314-fc3b-403d-a0bd-1ba914860a83
+md"""
+
+## Follow-up exercises
+
+1. Imagine each technology is a firm, which now might exercise market power. Can you modify clear_market_foc to account for market power as in BMS (2008)?
+
+2. The function is prepared to take several amounts of solar and wind. What are the impacts on prices as you increase solar and wind? Save prices for different values of wind or solar investment and plot them.
+
+3. [Harder] Making some assumptions on the fixed costs of solar and wind, can you expand the model to solver for investment? This will require a FOC for the zero profit entry condition. In Bushnell (2011) and Reguant (2019), that FOC might not be satisfied (zero investment), so it is also a complementarity problem.
+
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1737,5 +1752,6 @@ version = "0.9.1+5"
 # ╠═8e135ba9-3e4f-4ef5-98cd-a807146f6af7
 # ╠═e86d243e-fac9-45b1-810a-231e3ca93c2d
 # ╠═e9638f3f-4b3e-4349-8dca-0570002b8d3f
+# ╟─c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

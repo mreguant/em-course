@@ -6,15 +6,13 @@ date = Date(2021, 7, 9)
 
 # Day 2: Supply side I
 
-:warning: Materials under construction! Exercise materials not yet available.
-
 In the second lecture, we will talk about how to model electricity markets using mathematical programming tools. 
 
 In the practical session, we will get familiar with a dataset of electricity market hourly data from California, learn about how to simplify the data using clustering techniques, and set up an economic model of a simple electricity market.
 
 ## Lecture
 
-* **Slides**: <!--#[day1.pdf](/materials/day1/day1.pdf)-->
+* **Slides**: [day2.pdf](/materials/day2/day2.pdf)
 
 ## Practical exercise: A model of the electricity sector
 
@@ -22,7 +20,7 @@ The exercise will be based on the paper by Reguant (2019), "The Efficiency and S
 
 * **Exercise file**: [day2.jl](/materials/day2/day2.jl)
 
-* **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv), [data_technology_simple.csv](/materials/day2/data_technology_simple.csv)
+* **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv), [data\_technology\_simple.csv](/materials/day2/data_technology_simple.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file and the data CSV file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. 

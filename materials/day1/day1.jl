@@ -69,23 +69,26 @@ We will be using the library `Binscatters` for plotting.
 """
 
 # ╔═╡ f6d3813c-a11f-48ee-9212-15a67c71cf4b
-binscatter(df, @formula(emis_tCO2 ~ wind_forecast), 10, 
+begin
+	binscatter(df, @formula(emis_tCO2 ~ wind_forecast + demand + fe(year)), 10, 
 		seriestype = :scatterpath,
 		title = "Wind reduces emissions",
 		xlabel = "Wind forecast (GWh)",
-		ylabel = "Hourly emissions (tons CO2)")
+		ylabel = "Hourly emissions (tons CO2)", label="Forecast");
+	binscatter!(df, @formula(emis_tCO2 ~ wind + demand + fe(year)), 10,seriestype = :scatterpath)
+end
 
 # ╔═╡ e0e57a26-ea5f-47ad-9d13-5492cf5af1c5
 binscatter(df, @formula(wholesale_price ~ wind_forecast), 10, 
 		seriestype = :scatterpath,
-		title = "Wind reduces wholesale prices",
+		title = "Wind reduces wholesale prices (cannibalization effect)",
 		xlabel = "Wind forecast (GWh)",
 		ylabel = "Wholesale price (EUR/MWh)")
 
 # ╔═╡ 68429700-c94c-45f6-9765-53478aaed243
-binscatter(df, @formula(system_costs ~ wind_forecast), 10, 
+binscatter(df, @formula(system_costs ~ wind_forecast + demand + fe(year)), 10, 
 		seriestype = :scatterpath,
-		title = "Wind increases system costs",
+		title = "Wind increases system costs (intermittency)",
 		xlabel = "Wind forecast (GWh)",
 		ylabel = "System costs (EUR/MWh)")
 
@@ -196,7 +199,7 @@ md"""
 
 ## Follow-up exercises
 
-1. What is the environmental of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
+1. What is the environmental benefit of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
 
 2. What is the correlation of wind and demand? How could that affect the valuation of wind power?
 

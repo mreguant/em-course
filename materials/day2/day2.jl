@@ -197,14 +197,29 @@ md"""
 
 Before building the model, we define some model parameters related to:
 
-* Elasticity of demand and imports
-
 * Number and costs of different technologies (loaded from a small dataset)
+
+* Elasticity of demand and imports
 
 """
 
 # ╔═╡ 8d4c60c4-85ae-4790-86de-0bbd8f19e165
 tech = CSV.read("data_technology_simple.csv", DataFrame)
+
+# ╔═╡ 63045539-da95-4f28-99d8-9768d4622713
+md"""
+
+To calibrate demand, one can use different strategies. Here we compute the slope for the demand curve that is consistent with the assumed elasticity of demand. 
+
+Notice that this is a local elasticity approximation, but it has the advantage of being a linear demand curve, which is very attractive for the purposes of linear programming.
+
+The demand is: `` q = a - b \ p ``
+
+So the elasticity becomes: `` b \frac{p}{q} ``, which we set equal to an assumed parameter.
+
+Once we have ``b``, we can back out ``a``. An analogous procedure is done for imports.
+
+"""
 
 # ╔═╡ 7871247f-878e-43a0-a004-ff3f3d44c397
 begin
@@ -227,7 +242,13 @@ end
 # ╔═╡ 304789b8-92cd-4a9e-996a-84e2ce0bdec2
 md"""
 
-We are now ready to clear the market. We will **minimize costs** using a non-linear solver.
+### Non-linear solver
+
+We are now ready to clear the market. We will **maximize welfare** using a non-linear solver.
+
+`` \max \ CS - Costs ``
+
+`` \text{s.t.} \ \text{operational constraints, market clearing}. ``
 
 We will then consider an approach **based on FOC**, which is useful to extend to strategic firms as in Bushnell, Mansur, and Saravia (2008) and Ito and Reguant (2016).
 
@@ -319,6 +340,37 @@ results_min["avg_price"]
 
 # ╔═╡ b0fd10a3-25e7-40a9-8368-1dc31b60ca25
 results_min["cost"]
+
+# ╔═╡ 71c1e145-7c9d-4b83-b23b-04740f4c34a8
+md"""
+
+### Mixed integer solver
+
+The key to the FOC representation is to model the marginal cost of power plants. The algorithm will be using power plants until $MC = Price$. 
+
+**Note**: In the market power version of this algorithm, it sets $MR = MC$.
+
+We will be using **integer variables** to take into consideration that FOC are not necessarily at an interior solution in the presence of capacity constraints.
+
+If $Price < MC(0)$, a technology will not produce.
+
+If $Price > MC(K)$, a technology is at capacity and can no longer increase output. In such case, the firm is earning a markup even under perfect competition. We define the shadow value as:
+
+$\psi = Price - MC$
+
+Shadow values define the rents that firms make. These are directly used in an expaded version of the model with investment.
+
+We will define these conditions using binary variables (0 or 1):
+
+* ``u_1`` will turn on when we use a technology.
+* ``u_2`` will turn on when we use a technology at capacity. 
+* ``\psi`` can only be positive if ``u_2=1``.
+
+Compared to the previous approach:
+* There will not be an objective function.
+
+* We will use a solver for mixed integer programming (`Cbc`).
+"""
 
 # ╔═╡ 0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
 ## Clear market based on first-order conditions
@@ -427,6 +479,21 @@ results_foc["avg_price"]
 # ╔═╡ e9638f3f-4b3e-4349-8dca-0570002b8d3f
 results_foc["cost"]
 
+# ╔═╡ 07102cbb-3132-4c08-8e01-ad11d7e748dc
+md"""
+
+### Discussion of pros and cons:
+
+* Mixed integer programming has advantages due to its robust finding of global solutions.
+
+* Here, we are using first-order conditions, so a question arises regarding the validity of such conditions to fully characterize a unique solution in more general settings.
+
+* Non-linear solvers explore the objective function but do not tend to be global in nature.
+
+* Non-linear solvers cannot deal with an oligopolistic setting in a single model, as several agents are maximizing profits. We would need to iterate.
+
+"""
+
 # ╔═╡ c0bdd314-fc3b-403d-a0bd-1ba914860a83
 md"""
 
@@ -434,7 +501,7 @@ md"""
 
 1. Imagine each technology is a firm, which now might exercise market power. Can you modify clear_market_foc to account for market power as in BMS (2008)?
 
-2. The function is prepared to take several amounts of solar and wind. What are the impacts on prices as you increase solar and wind? Save prices for different values of wind or solar investment and plot them.
+2. The function is prepared to take several amounts of solar and wind. What are the impacts on prices as you increase solar and wind? Save prices for different values of wind or solar investment and plot them. Does your answer depend a lot on the number of clusters?
 
 3. [Harder] Making some assumptions on the fixed costs of solar and wind, can you expand the model to solver for investment? This will require a FOC for the zero profit entry condition. In Bushnell (2011) and Reguant (2019), that FOC might not be satisfied (zero investment), so it is also a complementarity problem.
 
@@ -1731,16 +1798,19 @@ version = "0.9.1+5"
 # ╟─0c8f9b70-d3c5-4a83-8020-e48f35fb48c4
 # ╟─505ba189-de94-4bb3-b7e6-860805951c03
 # ╠═8d4c60c4-85ae-4790-86de-0bbd8f19e165
+# ╟─63045539-da95-4f28-99d8-9768d4622713
 # ╠═7871247f-878e-43a0-a004-ff3f3d44c397
 # ╟─304789b8-92cd-4a9e-996a-84e2ce0bdec2
 # ╠═8bc65067-4ce0-4484-ab59-b3eebd4e56d6
 # ╠═7400ca77-a18f-4a46-a2d4-cfa527edfcb2
 # ╠═3b1665be-d1e9-4da5-b59a-b4fb31d1662e
 # ╠═b0fd10a3-25e7-40a9-8368-1dc31b60ca25
+# ╟─71c1e145-7c9d-4b83-b23b-04740f4c34a8
 # ╠═0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
 # ╠═8e135ba9-3e4f-4ef5-98cd-a807146f6af7
 # ╠═e86d243e-fac9-45b1-810a-231e3ca93c2d
 # ╠═e9638f3f-4b3e-4349-8dca-0570002b8d3f
+# ╠═07102cbb-3132-4c08-8e01-ad11d7e748dc
 # ╟─c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

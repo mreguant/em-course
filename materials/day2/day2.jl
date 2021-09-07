@@ -203,16 +203,6 @@ Before building the model, we define some model parameters related to:
 
 """
 
-# ╔═╡ 879f69f9-34fa-4afb-9fa7-4cdd0be94920
-begin
-	techs = CSV.read("data_technology.csv", DataFrame);
-	techs = techs[[1:4;6:7],:]
-	techs = select(techs,[:techname,:heatrate,:heatrate2,:capUB,:thermal,:e,:e2])
-	techs.c = techs.heatrate + techs.heatrate.*techs.thermal.*(3.5-1.0)
-	techs.c2 = techs.heatrate2 + techs.heatrate2.*techs.thermal.*(3.5-1.0)
-	CSV.write("data_technology_simple.csv", techs)
-end
-
 # ╔═╡ 8d4c60c4-85ae-4790-86de-0bbd8f19e165
 tech = CSV.read("data_technology_simple.csv", DataFrame)
 
@@ -1740,7 +1730,6 @@ version = "0.9.1+5"
 # ╠═d04f97b5-07bc-4907-922a-1f838547d93f
 # ╟─0c8f9b70-d3c5-4a83-8020-e48f35fb48c4
 # ╟─505ba189-de94-4bb3-b7e6-860805951c03
-# ╟─879f69f9-34fa-4afb-9fa7-4cdd0be94920
 # ╠═8d4c60c4-85ae-4790-86de-0bbd8f19e165
 # ╠═7871247f-878e-43a0-a004-ff3f3d44c397
 # ╟─304789b8-92cd-4a9e-996a-84e2ce0bdec2

@@ -254,7 +254,7 @@ function clear_market_at_t(d::Dict{String,Any};
 end
 
 # ╔═╡ 11da5515-5f09-4d7f-9450-e6145b4ca585
-clear_market_at_t(data)
+clear_market_at_t(data, tax=17.0, case=2)
 
 # ╔═╡ 4c738b38-8269-4cba-a321-64881f41c185
 md""" 
@@ -334,7 +334,7 @@ function clear_market_loop(d::Dict{String,Any}; case=2, tax=17.0, default=0.428,
 end
 
 # ╔═╡ ea459abd-398c-4bec-9540-e093993ee04f
-full_results = clear_market_loop(data)
+full_results = clear_market_loop(data, tax=17.0, case=2)
 
 # ╔═╡ 718c29d5-cdbe-469e-b37a-4e1b7c42b05a
 begin
@@ -373,6 +373,15 @@ full_results["price"]
 md"""
 
 ## Examining policy outcomes
+
+"""
+
+# ╔═╡ acf82acd-b212-41f0-b420-0988ca7a7654
+md"""
+
+We can explore the results of the policy for alternative combinations of parameters.
+
+First, we examine the baseline uniform case with a tax of $17/tCO2e.
 
 """
 
@@ -1606,6 +1615,7 @@ version = "0.9.1+5"
 # ╟─945fe315-41a5-4324-a9c6-c6a735cfe44d
 # ╠═44a71789-e99e-4f64-879b-f5947a9a342a
 # ╟─7e9f0841-e01a-4099-9c6d-04f901425926
+# ╠═acf82acd-b212-41f0-b420-0988ca7a7654
 # ╠═718c29d5-cdbe-469e-b37a-4e1b7c42b05a
 # ╠═c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001

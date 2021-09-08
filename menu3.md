@@ -14,7 +14,7 @@ In the practical session, we will continue to learn how to use JuMP to build ele
 
 ## Lecture
 
-* **Slides**: <!--[day3.pdf](/materials/day3/day3.pdf)-->
+* **Slides**: [day3.pdf](/materials/day3/day3.pdf)
 
 ## Practical exercise: Supply climate policies and leakage
 

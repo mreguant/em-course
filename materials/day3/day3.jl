@@ -10,6 +10,8 @@ begin
 	using JuMP  # used for mathematical programming
 	using Ipopt  # solver
 	using Printf
+	using Plots
+	using StatsPlots, Statistics, StatsBase
 end
 
 # ╔═╡ ec2c5947-3b0b-4214-8c56-06c5cea7eee9
@@ -124,6 +126,19 @@ The model follows similar steps from yesterday:
 5. Declare objective function.
 
 6. Declare constraints, [New] including those for the environmental regulation and the transmission lines.
+"""
+
+# ╔═╡ 9c2b7ee6-b218-4409-96e5-d08fe098e221
+md"""
+
+We consider several cases.
+
+1. No regulation, tax is 0.
+2. Uniform tax, every region.
+3. CA tax only.
+4. Tax of imports at default rate, with opt-out.
+5. Tax of imports at default rate, no opt-out.
+
 """
 
 # ╔═╡ 905c4477-10a0-4479-8ff5-8cfadb69c23f
@@ -268,9 +283,7 @@ Now that we have a function that generates outcomes from one hour, we can loop t
 """
 
 # ╔═╡ 024510e3-b1b6-449b-9a31-93f72449ebe1
-function clear_market_loop(d::Dict{String,Any}; case=2, tax=17.0, default=0.428, beta=1.0)
-
-    T = size(data["a"],2);  # time
+function clear_market_loop(d::Dict{String,Any}; T=100, case=2, tax=17.0, default=0.428, beta=1.0)
 
     # prepare buckets
     status = Any[];
@@ -288,8 +301,10 @@ function clear_market_loop(d::Dict{String,Any}; case=2, tax=17.0, default=0.428,
     q_ca = Any[];
     qmr_ca = Any[];
 	w_mat = Any[];
+	
+	T = min(T, size(d["a"],2));
     
-    for t in T:-1:1
+    for t in 1:T # limit to make computation faster!
         res = clear_market_at_t(data, t=t,
             case=case, tax=tax, default=default, beta=beta)
 		if ((res["status"]=="LOCALLY_SOLVED") | (res["status"]=="ALMOST_LOCALLY_SOLVED"))
@@ -333,25 +348,11 @@ function clear_market_loop(d::Dict{String,Any}; case=2, tax=17.0, default=0.428,
 
 end
 
-# ╔═╡ ea459abd-398c-4bec-9540-e093993ee04f
-full_results = clear_market_loop(data, tax=17.0, case=2)
+# ╔═╡ 1c6cd2b3-8895-418f-aff4-49c67bce0af6
+Tlimit = 10;  # We put a limit on the number of hours to run as it is intensive
 
-# ╔═╡ 718c29d5-cdbe-469e-b37a-4e1b7c42b05a
-begin
-	p1 = [full_results["price"][t][1] for t=1:100];
-	p2 = [full_results["price"][t][2] for t=1:100];
-	p3 = [full_results["price"][t][3] for t=1:100];
-	p4 = [full_results["price"][t][4] for t=1:100];
-	w = [full_results["w"][t] for t=1:100];
-	
-	using Plots
-	using StatsPlots, Statistics, StatsBase
-	histogram(p1, weights=w, label="CA")
-	histogram!(p2, weights=w, label="Northwest")
-	histogram!(p3, weights=w, label="Southwest")
-	histogram!(p4, weights=w, label="Rockies")
-	
-end
+# ╔═╡ ea459abd-398c-4bec-9540-e093993ee04f
+case2 = clear_market_loop(data, tax=17.0, case=2, T=Tlimit);
 
 # ╔═╡ 945fe315-41a5-4324-a9c6-c6a735cfe44d
 md"""
@@ -367,7 +368,7 @@ which is a vector of regional prices.
 """
 
 # ╔═╡ 44a71789-e99e-4f64-879b-f5947a9a342a
-full_results["price"]
+case2["price"]
 
 # ╔═╡ 7e9f0841-e01a-4099-9c6d-04f901425926
 md"""
@@ -381,9 +382,89 @@ md"""
 
 We can explore the results of the policy for alternative combinations of parameters.
 
-First, we examine the baseline uniform case with a tax of $17/tCO2e.
+First, we examine the baseline uniform case with a tax of $17/tCO2e and its implications for prices.
 
 """
+
+# ╔═╡ 718c29d5-cdbe-469e-b37a-4e1b7c42b05a
+let
+	
+	T = size(case2["w"], 1);
+	
+	p1 = [case2["price"][t][1] for t=1:T];
+	p2 = [case2["price"][t][2] for t=1:T];
+	p3 = [case2["price"][t][3] for t=1:T];
+	p4 = [case2["price"][t][4] for t=1:T];
+	w = [case2["w"][t] for t=1:T];
+	
+	histogram(p4, weights=w, label="Rockies", alpha=.5)
+	histogram!(p3, weights=w, label="Southwest", alpha=.5)
+	histogram!(p2, weights=w, label="Northwest", alpha=.5)
+	histogram!(p1, weights=w, label="CA", alpha=.5)
+	
+end
+
+# ╔═╡ 2e3bd279-ce6d-4067-a94b-f2d2b107fa05
+md"""
+
+Let's compare this to a case in which only California is taxed (case 3), leading to much lower prices particularly for NW and Rockies but all markets in general due to links across markets.
+
+"""
+
+# ╔═╡ df4d0179-9667-470f-8e7e-6348738dded7
+case3 = clear_market_loop(data, tax=17.0, case=3, T=Tlimit);
+
+# ╔═╡ c8fd768e-7c77-4879-8209-addc7e4b1c5c
+let
+	
+	T = size(case3["w"], 1);
+	
+	p1 = [case3["price"][t][1] for t=1:T];
+	p2 = [case3["price"][t][2] for t=1:T];
+	p3 = [case3["price"][t][3] for t=1:T];
+	p4 = [case3["price"][t][4] for t=1:T];
+	w = [case3["w"][t] for t=1:T];
+	
+	histogram(p4, weights=w, label="Rockies", alpha=.5)
+	histogram!(p3, weights=w, label="Southwest", alpha=.5)
+	histogram!(p2, weights=w, label="Northwest", alpha=.5)
+	histogram!(p1, weights=w, label="CA", alpha=.5)
+	
+end
+
+# ╔═╡ 3ba31ae3-7388-43ba-bf67-010a4ac00b61
+md""" 
+
+Emissions go away from California in this new setting.
+
+We can compare emissions in California between case2 and case3. 
+
+"""
+
+# ╔═╡ 13f6a927-58e2-4f23-8d2e-3639a0b74170
+sum([case2["totale_ca_instate"][t] for t=1:size(case2["w"],1)])
+
+# ╔═╡ 98f838ee-efa6-4951-930a-c60d37e4bc40
+sum([case3["totale_ca_instate"][t] for t=1:size(case3["w"],1)])
+
+# ╔═╡ 2cd5326b-14a8-4061-8bbe-99b8963b90f9
+md""" 
+
+We can analyze the impact of default policies into the outcome, which is absent unless firms cannot reshuffle.
+
+"""
+
+# ╔═╡ 6141dec6-578e-4c10-ba6a-d3a8eab2a84d
+case4 = clear_market_loop(data, tax=17.0, case=4, T=Tlimit);
+
+# ╔═╡ ce28e4c5-8d7a-4939-a02a-bef82da33a81
+sum([case4["totale_ca_instate"][t] for t=1:size(case4["w"],1)])
+
+# ╔═╡ 7e7b56c4-817e-4136-b699-0f1971f35c64
+case5 = clear_market_loop(data, tax=17.0, case=5, T=Tlimit);
+
+# ╔═╡ 0349e1aa-cef0-4d70-8941-af9f889922b8
+sum([case5["totale_ca_instate"][t] for t=1:size(case5["w"],1)])
 
 # ╔═╡ c0bdd314-fc3b-403d-a0bd-1ba914860a83
 md"""
@@ -392,7 +473,7 @@ md"""
 
 1. Modify the output code in the market loop so that you can make it a choice in the function: detailed (debugging) output, hourly output, or summary output.
 
-2. 
+2. Try different default rates for case 5. You will notice that emissions start declining as default rates start increasing, replicating the main figure in the paper. What are the tensions between balancing leakage and efficiency?
 
 """
 
@@ -1607,16 +1688,29 @@ version = "0.9.1+5"
 # ╟─5573dd3e-8a67-459c-84f6-06671d35a682
 # ╟─75c278e2-a8c8-4d21-b79e-555604febfbf
 # ╟─6049b514-2227-4b24-89f4-b2e01fe9db09
+# ╟─9c2b7ee6-b218-4409-96e5-d08fe098e221
 # ╠═905c4477-10a0-4479-8ff5-8cfadb69c23f
 # ╠═11da5515-5f09-4d7f-9450-e6145b4ca585
 # ╟─4c738b38-8269-4cba-a321-64881f41c185
 # ╠═024510e3-b1b6-449b-9a31-93f72449ebe1
+# ╠═1c6cd2b3-8895-418f-aff4-49c67bce0af6
 # ╠═ea459abd-398c-4bec-9540-e093993ee04f
 # ╟─945fe315-41a5-4324-a9c6-c6a735cfe44d
 # ╠═44a71789-e99e-4f64-879b-f5947a9a342a
 # ╟─7e9f0841-e01a-4099-9c6d-04f901425926
-# ╠═acf82acd-b212-41f0-b420-0988ca7a7654
+# ╟─acf82acd-b212-41f0-b420-0988ca7a7654
 # ╠═718c29d5-cdbe-469e-b37a-4e1b7c42b05a
-# ╠═c0bdd314-fc3b-403d-a0bd-1ba914860a83
+# ╟─2e3bd279-ce6d-4067-a94b-f2d2b107fa05
+# ╠═df4d0179-9667-470f-8e7e-6348738dded7
+# ╠═c8fd768e-7c77-4879-8209-addc7e4b1c5c
+# ╟─3ba31ae3-7388-43ba-bf67-010a4ac00b61
+# ╠═13f6a927-58e2-4f23-8d2e-3639a0b74170
+# ╠═98f838ee-efa6-4951-930a-c60d37e4bc40
+# ╟─2cd5326b-14a8-4061-8bbe-99b8963b90f9
+# ╠═6141dec6-578e-4c10-ba6a-d3a8eab2a84d
+# ╠═ce28e4c5-8d7a-4939-a02a-bef82da33a81
+# ╠═7e7b56c4-817e-4136-b699-0f1971f35c64
+# ╟─0349e1aa-cef0-4d70-8941-af9f889922b8
+# ╟─c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

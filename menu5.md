@@ -6,7 +6,9 @@ date = Date(2021, 9, 10)
 
 # Day 5: Demand side II
 
-:warning: Materials under construction! Exercise materials not yet available.
+In the fifth lecture, we will talk about the potential uneven impacts of the energy transition, with a focus on the electricity sector.
+
+In the practical session, we will learn how to combine machine learning tools applied to smart meter data with Census data to estimate the heterogeneity impacts of energy policies. 
 
 ## Lecture
 
@@ -25,6 +27,8 @@ The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (wor
 * Burger, S. P., Knittel, C. R., Pérez-Arriaga, I. J., Schneider, I., & Vom Scheidt, F. (2020). The efficiency and distributional effects of alternative residential electricity rate designs. Energy Journal, 41(1), 199–239. [https://doi.org/10.5547/01956574.41.1.SBUR](https://doi.org/10.5547/01956574.41.1.SBUR)
 
 * Feger, F., Pavanini, N., & Radulescu, D. (2020). Welfare and Redistribution in Residential Electricity Markets with Solar Power. _Working Paper_.
+
+* Leslie, G. and Pourkhanali, A. & Roger, G. (2021). Can Real-Time Pricing Be Progressive? Identifying Cross-Subsidies under Fixed-Rate Electricity Tariffs. [working paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3774556)
 
 * Wang, Reguant, Fabra, and Cahana (2021). The Distributional Impacts of Real-Time Pricing. _Work in progress_.
 

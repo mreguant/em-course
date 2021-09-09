@@ -324,7 +324,7 @@ md"""
 
 ## Follow-up exercises
 
-1. Include the consumption of non-RTP households as a potential control to the Lasso, as in Burlig et al. (2020).
+1. Include the consumption of non-RTP households as a potential control to the Lasso, as in Burlig et al. (2020). What can be some challenges without a pre-treatment period?
 
 2. Explore your ML method of choice as an alternative method to estimate the elasticities. 
 
@@ -1556,6 +1556,6 @@ version = "0.9.1+5"
 # ╠═d60275f1-ebb8-4b75-aaa0-20bc7dc297e5
 # ╟─7d8da4f9-5f0f-4145-8c92-3c4519dcf533
 # ╠═1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
-# ╟─cd229515-3441-4b9c-9dd0-936b49b50003
+# ╠═cd229515-3441-4b9c-9dd0-936b49b50003
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

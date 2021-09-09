@@ -6,8 +6,6 @@ date = Date(2021, 8, 9)
 
 # Day 3: Supply side II
 
-:warning: Materials under construction! Exercise materials not yet available.
-
 In the third lecture, we will talk about environmental regulation and how it affects participants in the electricity market. 
 
 In the practical session, we will continue to learn how to use JuMP to build electricity models. We will incorporate transmission lines and environmental regulation into a model with a richer set of plants. We will also practice ways in which to save and loop over several simulations.

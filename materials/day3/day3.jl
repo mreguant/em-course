@@ -92,6 +92,9 @@ end
 # ╔═╡ c90d4fc7-fe8c-4883-b2de-745d2e784c12
 data["a"]  # Example of output, intercept of demand for 4 regions and 100 periods
 
+# ╔═╡ ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
+data
+
 # ╔═╡ 5573dd3e-8a67-459c-84f6-06671d35a682
 md"""
 
@@ -345,6 +348,8 @@ function clear_market_loop(d::Dict{String,Any}; T=100, case=2, tax=17.0, default
                 "q_ca" => q_ca,
                 "qmr_ca" => qmr_ca,
                 "w" => w_mat);
+	
+	return results
 
 end
 
@@ -473,7 +478,9 @@ md"""
 
 1. Modify the output code in the market loop so that you can make it a choice in the function: detailed (debugging) output, hourly output, or summary output.
 
-2. Try different default rates for case 5. You will notice that emissions start declining as default rates start increasing, replicating the main figure in the paper. What are the tensions between balancing leakage and efficiency?
+2. Try different default rates for case 5. You will notice that emissions start declining as default rates start increasing, replicating the main figure in the paper. 
+
+3. What are the tensions between balancing leakage and efficiency? Try to show a more comprehensive measure of welfare than what our social planner is using (which only accounts for taxed emissions).
 
 """
 
@@ -1685,6 +1692,7 @@ version = "0.9.1+5"
 # ╟─84e1c3ee-b81a-4c2c-a913-c4cf54b4f1cd
 # ╠═1a656c1c-6b54-47c1-8764-06990f4b651b
 # ╠═c90d4fc7-fe8c-4883-b2de-745d2e784c12
+# ╠═ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
 # ╟─5573dd3e-8a67-459c-84f6-06671d35a682
 # ╟─75c278e2-a8c8-4d21-b79e-555604febfbf
 # ╟─6049b514-2227-4b24-89f4-b2e01fe9db09
@@ -1710,7 +1718,7 @@ version = "0.9.1+5"
 # ╠═6141dec6-578e-4c10-ba6a-d3a8eab2a84d
 # ╠═ce28e4c5-8d7a-4939-a02a-bef82da33a81
 # ╠═7e7b56c4-817e-4136-b699-0f1971f35c64
-# ╟─0349e1aa-cef0-4d70-8941-af9f889922b8
+# ╠═0349e1aa-cef0-4d70-8941-af9f889922b8
 # ╟─c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

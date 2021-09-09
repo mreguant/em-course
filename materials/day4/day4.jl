@@ -127,6 +127,15 @@ let
 	binscatter(mydata,  @formula(kwh ~ price + fe(id)))
 end
 
+# ╔═╡ cfbad02e-a889-41d9-93a9-224c8f2d492c
+let
+	# let's look at individual correlations
+	ids = unique(mydata.id);
+	corrs = [cor(mydata[mydata.id.==i,:].price,
+			mydata[mydata.id.==i,:].kwh) for i in ids];
+	histogram(corrs)
+end
+
 # ╔═╡ 97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 md"""
 
@@ -1527,6 +1536,7 @@ version = "0.9.1+5"
 # ╠═c3500aeb-88a0-4c1f-8f88-485b9a799e4c
 # ╠═ca3cec9d-a406-4ab7-b7ca-bc17d36e3970
 # ╠═9b626bbf-e10d-4f47-9a0c-5a968b8932e7
+# ╠═cfbad02e-a889-41d9-93a9-224c8f2d492c
 # ╟─97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 # ╟─9b614988-37cd-4faf-a56b-40348049cf8c
 # ╠═6b860839-1473-42b5-8125-35d68e888a6a

@@ -12,6 +12,7 @@ begin
 	using Plots
 	using StatsPlots
 	using RCall
+	using Binscatters
 end
 
 
@@ -92,6 +93,40 @@ begin
 	first(mydata, 5)
 end
 
+# ╔═╡ 49f22be1-056b-4828-aa8f-57073cc0d2a9
+md"""
+
+It can be useful to plot the data to examine patterns. We can plot the typical consumption pattern of consumers during the day.
+
+"""
+
+# ╔═╡ c3500aeb-88a0-4c1f-8f88-485b9a799e4c
+let
+	# here we can learn about ways of collapsing data in Julia
+	# lots going on here! see suggested exercise below
+	
+	df_plt = select(mydata,[:id,:hr,:kwh])
+	df_plt = combine(groupby(df_plt, [:id,:hr]), :kwh => median)
+	@df df_plt plot(:hr, :kwh_median, group=:id, legend=false)
+	
+end
+
+# ╔═╡ ca3cec9d-a406-4ab7-b7ca-bc17d36e3970
+let
+	# we can also plot prices
+	df_plt = select(mydata,[:hr,:price])
+	df_plt = combine(groupby(df_plt, :hr), :price => median)
+	@df df_plt plot(:hr, :price_median, legend=false)
+	
+end
+
+# ╔═╡ 9b626bbf-e10d-4f47-9a0c-5a968b8932e7
+let
+	# we can plot the raw correlation of consumption and prices
+	# interesting that not particularly correlated with price 
+	binscatter(mydata,  @formula(kwh ~ price + fe(id)))
+end
+
 # ╔═╡ 97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 md"""
 
@@ -169,8 +204,8 @@ We can plot the distribution of our household estimates
 
 # ╔═╡ af4d944e-93a6-4178-a30b-75d2f2b15e0e
 begin
-	density(beta_Hh,legend = :topleft)
-	plot!(xlab="x",ylab="density of the estimates",xlim=(-5,5))
+	density(beta_Hh,legend = false)
+	plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
 end
 
 
@@ -272,12 +307,27 @@ Again, we can plot the density of each group of estimates and check whether ther
 # ╔═╡ 1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
 begin
 	@df betas density(:estimate, group = :rtp,legend = :topleft)
-	plot!(xlab="x",ylab="density of the estimates",xlim=(-5,5))
+	plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
 end
+
+# ╔═╡ cd229515-3441-4b9c-9dd0-936b49b50003
+md"""
+
+## Follow-up exercises
+
+1. Include the consumption of non-RTP households as a potential control to the Lasso, as in Burlig et al. (2020).
+
+2. Explore your ML method of choice as an alternative method to estimate the elasticities. 
+
+3. Use the Clustering.jl library we used on day 2 to classify consumers into "typical" profiles. This can be a useful way of reducing the dimensionality of the data. We will do something like this on day 5 as well.
+
+
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Binscatters = "deae81f5-4416-4700-a781-f7a18782af9b"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Missings = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
@@ -288,6 +338,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
+Binscatters = "~0.2.1"
 CSV = "~0.8.5"
 DataFrames = "~1.2.2"
 Missings = "~1.0.1"
@@ -339,6 +390,12 @@ version = "1.0.0"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[Binscatters]]
+deps = ["DataFrames", "FixedEffectModels", "RecipesBase", "Statistics"]
+git-tree-sha1 = "62110d0febf2fecd83c313fc82ca4adfa3e32624"
+uuid = "deae81f5-4416-4700-a781-f7a18782af9b"
+version = "0.2.1"
 
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -393,6 +450,11 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
+
+[[Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
@@ -525,6 +587,18 @@ git-tree-sha1 = "a3b7b041753094f3b17ffa9d2e2e07d8cace09cd"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "0.12.3"
 
+[[FixedEffectModels]]
+deps = ["DataFrames", "FixedEffects", "LinearAlgebra", "Printf", "Reexport", "Statistics", "StatsBase", "StatsFuns", "StatsModels", "Tables", "Vcov"]
+git-tree-sha1 = "a036618f39adeffb39d9be8dd54ba2d073256503"
+uuid = "9d5cd8c9-2029-5cab-9928-427838db53e3"
+version = "1.6.4"
+
+[[FixedEffects]]
+deps = ["GroupedArrays", "LinearAlgebra", "Printf", "Requires", "StatsBase"]
+git-tree-sha1 = "91a0628a826002df975c8b22a39b79964e240376"
+uuid = "c8885935-8500-56a7-9867-7708b20db0eb"
+version = "2.0.8"
+
 [[FixedPointNumbers]]
 deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
@@ -605,6 +679,12 @@ version = "1.3.14+0"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[GroupedArrays]]
+deps = ["DataAPI", "Missings"]
+git-tree-sha1 = "93e21548d0a4b8ac793fea1aa1d720f5c9eaf11a"
+uuid = "6407cd72-fade-4a84-8a1e-56e431fc1533"
+version = "0.3.1"
 
 [[HTTP]]
 deps = ["Base64", "Dates", "IniFile", "Logging", "MbedTLS", "NetworkOptions", "Sockets", "URIs"]
@@ -1192,6 +1272,12 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
+[[Vcov]]
+deps = ["Combinatorics", "GroupedArrays", "LinearAlgebra", "StatsBase", "Tables"]
+git-tree-sha1 = "b382811c8beba117f70c07a42f3f18b3075a39db"
+uuid = "ec2bfdc2-55df-4fc9-b9ae-4958c2cf2486"
+version = "0.5.0"
+
 [[VersionParsing]]
 git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
 uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
@@ -1437,6 +1523,10 @@ version = "0.9.1+5"
 # ╠═2cd44e61-31ca-471c-b13a-a66aa29472ba
 # ╟─796bb3d9-2fc5-4335-ae81-5b8e8ce0711c
 # ╠═72302eae-5f8e-4b7c-b7c9-4d704d888481
+# ╟─49f22be1-056b-4828-aa8f-57073cc0d2a9
+# ╠═c3500aeb-88a0-4c1f-8f88-485b9a799e4c
+# ╠═ca3cec9d-a406-4ab7-b7ca-bc17d36e3970
+# ╠═9b626bbf-e10d-4f47-9a0c-5a968b8932e7
 # ╟─97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 # ╟─9b614988-37cd-4faf-a56b-40348049cf8c
 # ╠═6b860839-1473-42b5-8125-35d68e888a6a
@@ -1456,5 +1546,6 @@ version = "0.9.1+5"
 # ╠═d60275f1-ebb8-4b75-aaa0-20bc7dc297e5
 # ╟─7d8da4f9-5f0f-4145-8c92-3c4519dcf533
 # ╠═1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
+# ╟─cd229515-3441-4b9c-9dd0-936b49b50003
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -10,6 +10,8 @@ date = Date(2021, 9, 9)
 
 ## Lecture
 
+* **Slides**: [day4.pdf](/materials/day4/day4.pdf), [schools_bgse.pdf](/materials/day4/schools_bgse.pdf), [rtp_project1.pdf](/materials/day4/rtp_project1.pdf)
+
 ## Practical exercise: Dynamic pricing in retail
 
 The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (2021). Reading the paper in advance is encouraged.

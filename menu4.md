@@ -6,7 +6,9 @@ date = Date(2021, 9, 9)
 
 # Day 4: Demand side I
 
-:warning: Materials under construction! Exercise materials not yet available.
+In the fourth lecture, we will talk about how demand actions can contribute to the energy transition, via energy efficiency and demand response.
+
+In the practical session, we will learn how to use machine learning tools to estimate the response to real-time pricing.
 
 ## Lecture
 

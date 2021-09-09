@@ -42,7 +42,7 @@ md"""
 md"""
 Loading **data**. 
 
-* GN\_sample.csv: Smart meter data of a small sample of 100 consumers.
+* data\_rtp.csv: Smart meter data of a small sample of 100 consumers.
 
 The data is already merged with several other hourly data that can be either consumer specific (weather) or market specific (solar, wind, prices).
 """
@@ -63,7 +63,7 @@ We create some Fourier transforms of time.
 
 # ╔═╡ 2cd44e61-31ca-471c-b13a-a66aa29472ba
 begin
-	mydata.t = mydata.date + mydata.hr/24;
+	mydata.t = mydata.date + mydata.hr/24 .- 20560.0;
 	for x in [1, 7, 365]
 		mydata[!, string("tau",x)] = ((mydata.t .+ 0.5)/x) * π * 2.0
 		mydata[!, string("tau2",x)] = mydata[!, string("tau",x)].^2.0
@@ -106,17 +106,17 @@ let
 	# lots going on here! see suggested exercise below
 	
 	df_plt = select(mydata,[:id,:hr,:kwh])
-	df_plt = combine(groupby(df_plt, [:id,:hr]), :kwh => median)
-	@df df_plt plot(:hr, :kwh_median, group=:id, legend=false)
+	df_plt = combine(groupby(df_plt, [:id,:hr]), :kwh => mean)
+	@df df_plt plot(:hr, :kwh_mean, group=:id, legend=false)
 	
 end
 
 # ╔═╡ ca3cec9d-a406-4ab7-b7ca-bc17d36e3970
 let
 	# we can also plot prices
-	df_plt = select(mydata,[:hr,:price])
-	df_plt = combine(groupby(df_plt, :hr), :price => median)
-	@df df_plt plot(:hr, :price_median, legend=false)
+	df_plt = select(mydata,[:hr,:price, :m])
+	df_plt = combine(groupby(df_plt, [:hr,:m]), :price => median)
+	@df df_plt plot(:hr, :price_median, group=:m)
 	
 end
 
@@ -133,7 +133,18 @@ let
 	ids = unique(mydata.id);
 	corrs = [cor(mydata[mydata.id.==i,:].price,
 			mydata[mydata.id.==i,:].kwh) for i in ids];
-	histogram(corrs)
+	histogram(corrs, title="Individual correlation between consumption and prices")
+end
+
+# ╔═╡ aa4c30b7-4f0a-4963-84d9-62644a08f5ce
+let
+	# let's look at individual correlations
+	dates = unique(mydata.date);
+	corrs = [maximum(mydata[mydata.date.==i,:].price)/
+		minimum(mydata[mydata.date.==i,:].price) for i in dates];
+	#histogram(corrs, title="Individual correlation between consumption and prices")
+	scatter(dates, corrs)
+	Plots.savefig("scatter_diffs.pdf");
 end
 
 # ╔═╡ 97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
@@ -191,18 +202,19 @@ We run a separate regression per household.
 begin
 	for i in 1:length(sample)
 		@rput i
-	 R"""
-	library(hdm) 
-	library(dplyr)
-		iv.reg = rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
-		log(price+.01) + ", controls, " |
-		wind_hat + ", controls)),
-		data = filter(mydata,id==sample[i]), 
-		select.X = TRUE, select.Z = FALSE)
-	beta1<-iv.reg$coef
-	"""	
+		 R"""
+			library(hdm) 
+			library(dplyr)
+			iv.reg = rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
+				log(price+.01) + ", controls, " |
+				wind_hat + ", controls)),
+				data = filter(mydata,id==sample[i]), 
+				select.X = TRUE, select.Z = FALSE)
+			beta1<-iv.reg$coef
+			beta_Hh[i]<-beta1
+		"""
 		@rget beta1
-		beta_Hh[i]=beta1
+		beta_Hh[i] <- beta1
 	end
 end
 
@@ -295,7 +307,7 @@ begin
 	library(hdm) 
 	library(dplyr)
 		iv.reg =  rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
-		log(price+.01) + ", controls, " |
+		log(price+.01) + ", controls, "  |
 		wind_hat + ", controls)),
 		data = filter(data1,id==sample1[i]), 
 		select.X = TRUE, select.Z = FALSE)
@@ -1537,6 +1549,7 @@ version = "0.9.1+5"
 # ╠═ca3cec9d-a406-4ab7-b7ca-bc17d36e3970
 # ╠═9b626bbf-e10d-4f47-9a0c-5a968b8932e7
 # ╠═cfbad02e-a889-41d9-93a9-224c8f2d492c
+# ╠═aa4c30b7-4f0a-4963-84d9-62644a08f5ce
 # ╟─97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 # ╟─9b614988-37cd-4faf-a56b-40348049cf8c
 # ╠═6b860839-1473-42b5-8125-35d68e888a6a
@@ -1556,6 +1569,6 @@ version = "0.9.1+5"
 # ╠═d60275f1-ebb8-4b75-aaa0-20bc7dc297e5
 # ╟─7d8da4f9-5f0f-4145-8c92-3c4519dcf533
 # ╠═1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
-# ╠═cd229515-3441-4b9c-9dd0-936b49b50003
+# ╟─cd229515-3441-4b9c-9dd0-936b49b50003
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

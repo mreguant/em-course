@@ -12,6 +12,9 @@ In the practical session, we will learn how to combine machine learning tools ap
 
 ## Lecture
 
+* **Slides**: [day5.pdf](/materials/day5/day5.pdf), [slides_wrfc.pdf](/materials/day5/slides_wrfc.pdf)
+
+
 ## Practical exercise: Heterogeneous consumers
 
 The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (work in progress). Paper not yet available for distribution.

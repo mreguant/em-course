@@ -74,13 +74,20 @@ md"""
 
 Now the fun part. We will assume our data does not have data income and using a naïve approach, the best we can get is the red line in the graph above...
 
-We will get at consumer heterogeneity by classifying households into types.
+"""
 
-**Note:** The data here have already been prepped to do that. We have summarized the smart meter data into one line per household, so that we can easily apply the clustering technique.
+# ╔═╡ 3508ae1c-1892-4e8d-be4a-930d9fc254a5
+md"""
+
+### Step 1
+
+In Step 1, we will get at consumer heterogeneity by classifying households into types.
+
+**Note:** The data here have already been prepped to do that. I have summarized the smart meter data into one line per household, so that we can easily apply the clustering technique.
 
 """
 
-# ╔═╡ 5387a443-0a60-497b-8b22-a5a1f615eebd
+# ╔═╡ 086e3bb4-b152-4aa1-b0e3-ecb4dfdb91b8
 begin
 	X = transpose(Array(select(df,Between(:kwh0,:s_24_mean0))));
 	
@@ -88,6 +95,22 @@ begin
 	Xs = (X.- repeat(mean(X,dims=2),1,nrow(df)))./repeat(std(X,dims=2),1,nrow(df)); 
 	R = kmeans(Xs, 5);
 end
+
+# ╔═╡ 6a8659ad-ce26-408a-b2c1-06efc911e247
+md"""
+
+### Step 2
+Here we define the Step 2 GMM function, which takes the zip-code level income distribution and the zip-code level type distribution as given.
+
+The algorithm solves for $\eta$:
+
+$\begin{align*}
+min_{\eta} & \sum_z \omega_z \sum_k \Big( Pr_z(inc_k) - \sum_{i \in z} \sum_n {\color{red} \eta_n^k} { Pr_z(\theta_n) }\Big)^2 \\
+\text{ s.t. } & \sum_k \eta^k_n = 1, \forall n, \\
+& \eta^k_n \in [0,1], \forall n,k.
+\end{align*}$
+
+"""
 
 # ╔═╡ b143dd68-24df-44a0-bf0e-e258be9df540
 function gmm_zip(inc::Array{Float64,2}, theta::Array{Float64,2})
@@ -113,14 +136,23 @@ function gmm_zip(inc::Array{Float64,2}, theta::Array{Float64,2})
 	
 	optimize!(model);
 	
-	return JuMP.value.(eta),  JuMP.value.(fit)
+	status = @sprintf("%s", JuMP.termination_status(model));
+	
+	if (status=="LOCALLY_SOLVED")
+		return JuMP.value.(eta),  JuMP.value.(fit)
+	else
+		@sprintf("%s",JuMP.termination_status(model))
+	end
 	
 end
 
 # ╔═╡ a9ce1df9-fe66-4eed-bacb-064acfe03871
 md""" 
 
-Here we will run the algorithm for every group of zip codes.
+
+### Putting the two steps together
+
+Here we will run the algorithm for every group of similar zip codes.
 
 * Step 1: Cluster types.
 
@@ -128,20 +160,25 @@ Here we will run the algorithm for every group of zip codes.
 
 """
 
+# ╔═╡ 49f10410-e675-4363-9702-3a566eb7f313
+propertynames(df[1,Between(:id,:inck)])
+
 # ╔═╡ 1730d0b3-c20b-4b26-b51b-b42e4ce564fc
 begin
-	
+
 	# Number of cluster
 	N = 5;
 	
 	# set up some matrix to store results and help
+	df.index = rownumber.(eachrow(df));
 	df[!,"theta"] = zeros(nrow(df));
 	for k=1:5
-		df[!,string("inc",k)] = (df.inck.==k);
 		df[!,string("inc_imp",k)] = zeros(nrow(df));
 	end
-	df.index = rownumber.(eachrow(df));
-	
+	for k=1:5
+		df[!,string("inc",k)] = (df.inck.==k);
+	end
+
 	# Loop k-means over groups of zip codes
 	for zg in unique(df.zip_group)
 		
@@ -154,27 +191,28 @@ begin
 		# We scale variables to improve kmeans performance
 		Xs = (X.-repeat(mean(X,dims=2),1,nrow(df_zip))) ./
 				repeat(std(X,dims=2),1,nrow(df_zip)); 
-		R = kmeans(Xs, N);
+		R = kmeans(Xs, N, tol=1e-8, maxiter=1000);
 		
 		# Store theta assignments
 		df_zip[!,"theta"] = assignments(R);
 		
-		# STEP 1 ####
-		
-		# note: this should have been coded in a more robust way
-		# now n is hard coded via the theta line
+		# STEP 2 ####
 
 		# create dummies for types to get type-zip code distribution
 		for n=1:N
 			df_zip[!,string("theta",n)] = (df_zip.theta.==n);
 		end
+		
 		zip_mat = combine(groupby(df_zip, :zip_id), 
 			:inc1 => mean, :inc2 => mean, :inc3 => mean, :inc4 => mean, :inc5 => mean,
 			:theta1 => mean, :theta2 => mean, 
 			:theta3 => mean, :theta4 => mean, :theta5 => mean);
 
-		inc_dist = Array(zip_mat[!,2:6]);
-		theta_dist = Array(zip_mat[!,7:7+N-1]);
+		inc_dist = Array(combine(groupby(df_zip, :zip_id), 
+				propertynames(df_zip[:,Between(:inc1,:inc5)]) .=> mean))[:,2:6];
+		theta_dist = Array(combine(groupby(df_zip, :zip_id), 
+				propertynames(df_zip[:,Between(:theta1,string("theta",N))]) 
+				.=> mean))[:,2:6];
 
 		eta_fit, inc_fit = gmm_zip(inc_dist,theta_dist)
 		
@@ -184,12 +222,9 @@ begin
 			[df[ind_zip[i],string("inc_imp",k)] = 
 				eta_fit[k,df_zip[i,:theta]] for i in 1:nrow(df_zip)];
 		end
-		
 	end
+	
 end
-
-# ╔═╡ 124dae7f-e550-45cc-86dc-64b90cf876be
-df[!,Between("inc_imp1","inc_imp5")]
 
 # ╔═╡ f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 md"""
@@ -1567,11 +1602,13 @@ version = "0.9.1+5"
 # ╠═b334db5a-4461-493a-b7fd-336b5c9c0ec4
 # ╠═e8bbf3d6-425e-475c-8d68-73b4a3f82dd8
 # ╟─a6f0afa5-9917-46d4-99e5-9904379db2f3
-# ╠═5387a443-0a60-497b-8b22-a5a1f615eebd
+# ╟─3508ae1c-1892-4e8d-be4a-930d9fc254a5
+# ╠═086e3bb4-b152-4aa1-b0e3-ecb4dfdb91b8
+# ╟─6a8659ad-ce26-408a-b2c1-06efc911e247
 # ╠═b143dd68-24df-44a0-bf0e-e258be9df540
 # ╟─a9ce1df9-fe66-4eed-bacb-064acfe03871
+# ╠═49f10410-e675-4363-9702-3a566eb7f313
 # ╠═1730d0b3-c20b-4b26-b51b-b42e4ce564fc
-# ╠═124dae7f-e550-45cc-86dc-64b90cf876be
 # ╟─f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 # ╠═66e07ec1-1017-4306-9e5d-ce653b535455
 # ╠═122b04a2-d77e-43a3-8542-65b5b1e70964

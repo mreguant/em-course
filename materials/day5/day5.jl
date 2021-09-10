@@ -83,6 +83,10 @@ md"""
 
 In Step 1, we will get at consumer heterogeneity by classifying households into types.
 
+Here we will be using k-means clustering based on consumer load profiles and average consumption.
+
+Here is an example of how to do it for all the data at once. Later, we will do it by groups of zip codes to allow for greater heterogeneity.
+
 **Note:** The data here have already been prepped to do that. I have summarized the smart meter data into one line per household, so that we can easily apply the clustering technique.
 
 """
@@ -93,7 +97,7 @@ begin
 	
 	# We scale variables to improve kmeans performance
 	Xs = (X.- repeat(mean(X,dims=2),1,nrow(df)))./repeat(std(X,dims=2),1,nrow(df)); 
-	R = kmeans(Xs, 5);
+	R = kmeans(Xs, 5, maxiter=500, tol=1e-8);
 end
 
 # ╔═╡ 6a8659ad-ce26-408a-b2c1-06efc911e247
@@ -105,7 +109,7 @@ Here we define the Step 2 GMM function, which takes the zip-code level income di
 The algorithm solves for $\eta$:
 
 $\begin{align*}
-min_{\eta} & \sum_z \omega_z \sum_k \Big( Pr_z(inc_k) - \sum_{i \in z} \sum_n {\color{red} \eta_n^k} { Pr_z(\theta_n) }\Big)^2 \\
+min_{\eta} & \sum_z \omega_z \sum_k \Big( Pr_z(inc_k) - \sum_n {\color{red} \eta_n^k} { Pr_z(\theta_n) }\Big)^2 \\
 \text{ s.t. } & \sum_k \eta^k_n = 1, \forall n, \\
 & \eta^k_n \in [0,1], \forall n,k.
 \end{align*}$
@@ -191,7 +195,7 @@ begin
 		# We scale variables to improve kmeans performance
 		Xs = (X.-repeat(mean(X,dims=2),1,nrow(df_zip))) ./
 				repeat(std(X,dims=2),1,nrow(df_zip)); 
-		R = kmeans(Xs, N, tol=1e-8, maxiter=1000);
+		R = kmeans(Xs, N, tol=1e-8, maxiter=500);
 		
 		# Store theta assignments
 		df_zip[!,"theta"] = assignments(R);
@@ -228,6 +232,8 @@ end
 
 # ╔═╡ f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 md"""
+
+### Examining the results 
 
 We can now check how the method is doing...!
 

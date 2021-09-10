@@ -18,11 +18,15 @@ The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (wor
 
 * **Exercise file**: [day5.jl](/materials/day5/day5.jl)
 
-* **Data file**: [data_montecarlo.csv](/materials/day5/data_montecarlo.csv)
+* **Data file**: [data_kmeans.csv](/materials/day5/data_kmeans.csv)
 
 ## References and readings
 
 * Borenstein, S. (2012). The Redistributional Impact of Nonlinear Electricity Pricing. American Economic Journal: Economic Policy, 4(3), 56–90. [https://doi.org/10.1257/pol.4.3.56](https://doi.org/10.1257/pol.4.3.56)
+
+* Borenstein, S., & Davis, L. W. (2016). The Distributional Effects of US Clean Energy Tax Credits. Https://Doi.Org/10.1086/685597, 30(1), 191–234. [https://doi.org/10.1086/685597](https://doi.org/10.1086/685597)
+
+* Borenstein, S. (2017). Private Net Benefits of Residential Solar PV: The Role of Electricity Tariffs, Tax Incentives, and Rebates. Https://Doi.Org/10.1086/691978, 4(S1), S85–S122. [https://doi.org/10.1086/691978](https://doi.org/10.1086/685597)
 
 * Burger, S. P., Knittel, C. R., Pérez-Arriaga, I. J., Schneider, I., & Vom Scheidt, F. (2020). The efficiency and distributional effects of alternative residential electricity rate designs. Energy Journal, 41(1), 199–239. [https://doi.org/10.5547/01956574.41.1.SBUR](https://doi.org/10.5547/01956574.41.1.SBUR)
 

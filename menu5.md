@@ -21,7 +21,7 @@ The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (wor
 
 * **Exercise file**: [day5.jl](/materials/day5/day5.jl)
 
-* **Data file**: [data_kmeans.csv](/materials/day5/data_kmeans.csv)
+* **Data file**: [data_kmeans.csv.zip](/materials/day5/data_kmeans.csv.zip)
 
 ## References and readings
 

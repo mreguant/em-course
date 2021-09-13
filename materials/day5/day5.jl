@@ -72,7 +72,7 @@ md"""
 
 ## Pretending we don't know! (we really don't)
 
-Now the fun part. We will assume our data does not have data income and using a naïve approach, the best we can get is the red line in the graph above...
+Now the fun part. We will assume our data does not have data income `inck` and using a naïve approach, the best we can get is the red line in the graph above...
 
 """
 
@@ -93,11 +93,30 @@ Here is an example of how to do it for all the data at once. Later, we will do i
 
 # ╔═╡ 086e3bb4-b152-4aa1-b0e3-ecb4dfdb91b8
 begin
-	X = transpose(Array(select(df,Between(:kwh0,:s_24_mean0))));
+	X = transpose(Array(select(df,Between(:kwh,:s_24_mean0))));
 	
 	# We scale variables to improve kmeans performance
 	Xs = (X.- repeat(mean(X,dims=2),1,nrow(df)))./repeat(std(X,dims=2),1,nrow(df)); 
 	R = kmeans(Xs, 5, maxiter=500, tol=1e-8);
+end
+
+# ╔═╡ 50a16323-bf77-4bc3-a17d-3e5512439866
+md""" 
+
+We can plot the profiles picked up by k-means.
+
+"""
+
+# ╔═╡ 15104b9d-5277-4644-91e2-4e64a676e053
+let
+	df.theta_together = assignments(R);
+	df_plt = combine(groupby(df, :theta_together), 
+		propertynames(df[:,Between(:s_1_mean0,:s_24_mean0)]) .=> mean);
+	
+	to_plot = transpose(Array(df_plt[:,Between(:s_1_mean0_mean,:s_24_mean0_mean)]));
+	plot(1:24,to_plot,legend=false, 
+		title="Representative consumer loads", 
+		xlabel="Hour of the day", ylabel="Market share")
 end
 
 # ╔═╡ 6a8659ad-ce26-408a-b2c1-06efc911e247
@@ -164,18 +183,14 @@ Here we will run the algorithm for every group of similar zip codes.
 
 """
 
-# ╔═╡ 49f10410-e675-4363-9702-3a566eb7f313
-propertynames(df[1,Between(:id,:inck)])
-
 # ╔═╡ 1730d0b3-c20b-4b26-b51b-b42e4ce564fc
 begin
 
-	# Number of cluster
+	# Number of clusters per group of zip codes
 	N = 5;
 	
 	# set up some matrix to store results and help
 	df.index = rownumber.(eachrow(df));
-	df[!,"theta"] = zeros(nrow(df));
 	for k=1:5
 		df[!,string("inc_imp",k)] = zeros(nrow(df));
 	end
@@ -183,11 +198,13 @@ begin
 		df[!,string("inc",k)] = (df.inck.==k);
 	end
 
+	# This line will put all zip codes together in the same group
+	#df.zip_group = 0 * df.zip_group
+	
 	# Loop k-means over groups of zip codes
 	for zg in unique(df.zip_group)
 		
 		df_zip = filter(row -> row.zip_group==zg, df);
-		
 		
 		# STEP 1 ####
 		X = transpose(Array(select(df_zip,Between(:kwh,:s_24_mean0))));
@@ -195,28 +212,22 @@ begin
 		# We scale variables to improve kmeans performance
 		Xs = (X.-repeat(mean(X,dims=2),1,nrow(df_zip))) ./
 				repeat(std(X,dims=2),1,nrow(df_zip)); 
-		R = kmeans(Xs, N, tol=1e-8, maxiter=500);
+		R = kmeans(Xs, N; tol=1e-8, maxiter=500);
 		
 		# Store theta assignments
 		df_zip[!,"theta"] = assignments(R);
 		
 		# STEP 2 ####
-
 		# create dummies for types to get type-zip code distribution
 		for n=1:N
 			df_zip[!,string("theta",n)] = (df_zip.theta.==n);
 		end
-		
-		zip_mat = combine(groupby(df_zip, :zip_id), 
-			:inc1 => mean, :inc2 => mean, :inc3 => mean, :inc4 => mean, :inc5 => mean,
-			:theta1 => mean, :theta2 => mean, 
-			:theta3 => mean, :theta4 => mean, :theta5 => mean);
 
 		inc_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:inc1,:inc5)]) .=> mean))[:,2:6];
 		theta_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:theta1,string("theta",N))]) 
-				.=> mean))[:,2:6];
+				.=> mean))[:,2:N+1];
 
 		eta_fit, inc_fit = gmm_zip(inc_dist,theta_dist)
 		
@@ -229,6 +240,9 @@ begin
 	end
 	
 end
+
+# ╔═╡ f683f88e-02b0-485e-910b-143beb3057aa
+unique(df.zip_id)
 
 # ╔═╡ f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 md"""
@@ -252,6 +266,8 @@ let
 	# we assume all households have the same income distribution as the zip code
 	# equivalent to assuming all households have the same losing rate
 	new_fit = [mean(df.loose, weights(df[!,string("inc_imp",k)])) for k=1:5]
+	# replicates truth again
+	# new_fit = [mean(df.loose, weights((df[!,"inck"].==k))) for k=1:5]
 	plot!(new_fit, label="K-means approach")
 
 end
@@ -1610,11 +1626,13 @@ version = "0.9.1+5"
 # ╟─a6f0afa5-9917-46d4-99e5-9904379db2f3
 # ╟─3508ae1c-1892-4e8d-be4a-930d9fc254a5
 # ╠═086e3bb4-b152-4aa1-b0e3-ecb4dfdb91b8
+# ╟─50a16323-bf77-4bc3-a17d-3e5512439866
+# ╠═15104b9d-5277-4644-91e2-4e64a676e053
 # ╟─6a8659ad-ce26-408a-b2c1-06efc911e247
 # ╠═b143dd68-24df-44a0-bf0e-e258be9df540
 # ╟─a9ce1df9-fe66-4eed-bacb-064acfe03871
-# ╠═49f10410-e675-4363-9702-3a566eb7f313
 # ╠═1730d0b3-c20b-4b26-b51b-b42e4ce564fc
+# ╠═f683f88e-02b0-485e-910b-143beb3057aa
 # ╟─f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 # ╠═66e07ec1-1017-4306-9e5d-ce653b535455
 # ╠═122b04a2-d77e-43a3-8542-65b5b1e70964

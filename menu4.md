@@ -22,6 +22,9 @@ The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (202
 
 * **Data file**: [data_rtp.csv](/materials/day4/data_rtp.csv)
 
+<!-- ## Homework -->
+> :exclamation: Save the exercise Julia file and the data zip file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. 
+
 ## References and readings
 
 * Blonz, J. A. (2021). Making the Best of the Second-Best: Welfare Consequences of Time-Varying Electricity Prices. _Working paper_.

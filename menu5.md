@@ -23,6 +23,9 @@ The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (wor
 
 * **Data file**: [data_kmeans.csv.zip](/materials/day5/data_kmeans.csv.zip)
 
+<!-- ## Homework -->
+> :exclamation: Save the exercise Julia file and the data zip file in the same folder. You need to unzip de data\_kmeans.csv file. It is only one compressed .csv file. Then, open the exercise Julia file from Pluto to start exploring. 
+
 ## References and readings
 
 * Borenstein, S. (2012). The Redistributional Impact of Nonlinear Electricity Pricing. American Economic Journal: Economic Policy, 4(3), 56–90. [https://doi.org/10.1257/pol.4.3.56](https://doi.org/10.1257/pol.4.3.56)

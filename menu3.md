@@ -20,12 +20,13 @@ The exercise will be based on the paper by [Fowlie, Petersen, and Reguant (2021)
 
 A repository of the conference paper can be found [here](https://www.openicpsr.org/openicpsr/project/131024/version/V1/view). The [online appendix](https://www.aeaweb.org/content/file?id=14554) is particularly helpful, given how short the paper is.
 
-* **Exercise file**: [day3.jl](/materials/day3/day3.jl)
+* **Exercise file**: [day3.jl](/materials/day3/day3.jl) / [day3.html](/materials/day3/day3/)
 
 * **Data file**: [data_leakage.zip](/materials/day3/data_leakage.zip)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file and the data zip file in the same folder. You need to unzip de data\_leakage folder. It should appear as a subfolder with the same name, "data\_leakage". It contains several .csv files. Then, open the exercise Julia file from Pluto to start exploring. 
+Note that the .html file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings
 

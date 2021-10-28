@@ -18,7 +18,7 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 The exercise will be based on the paper by Petersen, Reguant, and Segura (2021). Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day1.jl](/materials/day1/day1.jl)
+* **Exercise file**: [day1.jl](/materials/day1/day1.jl) / [day1.html](/materials/day1/day1.html) (static non-interactive HTML version)
 
 * **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
 

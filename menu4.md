@@ -18,12 +18,12 @@ In the practical session, we will learn how to use machine learning tools to est
 
 The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (2021). Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day4.jl](/materials/day4/day4.jl) / [day4.html](/materials/day4/day4/)
+* **Exercise file**: [day4.jl](/materials/day4/day4.jl) / [day4_julia.pdf](/materials/day4/day4_julia.pdf)
 
 * **Data file**: [data_rtp.csv](/materials/day4/data_rtp.csv)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.jl) and the data zip file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. Note that the .html file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the exercise Julia file (.jl) and the data zip file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings
 

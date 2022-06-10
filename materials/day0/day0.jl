@@ -51,7 +51,7 @@ We will be plotting the evolution of wind investment over time for a few select 
 
 1. We first filter the data with the list of countries.
 
-2. We then plot the evolution of installed capacities using Pandas and Seaborn, this is a trick to benefit from the Python functionality in plotting. **Note:** If you are familiar with R, you can similarly use R tools from Julia.
+2. We then plot the evolution of installed capacities for each country. 
 
 """
 
@@ -60,26 +60,21 @@ begin
 	# we clean up the data
 	country_list = ["Germany", "Spain", "United States"];
 	df_sample = df[df.Year .> 2000, :];
-	df_sample = filter(row -> row.Entity in country_list, df_sample);
-	df_sample = select(df_sample, ["Entity", "Year", "Wind Capacity"]);
+	filter!(row -> row.Entity in country_list, df_sample);
+	select!(df_sample, ["Entity", "Year", "WindCapacity"]);
 end
 
 # ╔═╡ 045b3710-b5e0-4231-88b2-b8071d462820
 begin
-	using Seaborn
-	using Pandas
-	using PyPlot
-	using PyCall
+	using Plots
 	
-	# here we convert the data to Pandas
-	df_pandas = Pandas.DataFrame(df_sample)
+		
+	plot(df_sample.Year, df_sample.WindCapacity, group = df_sample.Entity,
+	seriestype = :line, linewidth = 3,
+		xlabel = "Year",
+		ylabel = "Wind Capacity")
+	end
 	
-	# here we do the plot
-	close("all")
-	lineplot(x="Year", y="Wind Capacity", data=df_pandas, hue="Entity")
-	gcf()
-end
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]

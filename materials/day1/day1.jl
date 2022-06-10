@@ -7,6 +7,7 @@ using InteractiveUtils
 # ╔═╡ 0bde0adc-136d-4aec-8e2b-3341555ad8c0
 begin
 	using DataFrames
+	using Statistics
 	using CSV
 	using Plots
 	using Binscatters
@@ -37,7 +38,7 @@ Pkg.add("LibraryName")
 
 To **load the libraries**, we use the command `using`. 
 
-Here we will be loading a bunch of libraries so that we can load and use the data (`DataFrames`, `CSV`) and make some nice plots (`Plots`, `Binscatters`). We will also be running some fixed-effects regressions (`FixedEffectModels`).
+Here we will be loading a bunch of libraries so that we can load and use the data (`DataFrames`, `CSV`), compute statistics and manipulate data (`Statistics`) and make some nice plots (`Plots`, `Binscatters`). We will also be running some fixed-effects regressions (`FixedEffectModels`).
 """
 
 # ╔═╡ a38335ed-32a3-4168-9cc4-a83af5fc02dd
@@ -53,10 +54,59 @@ begin
 	first(df, 5)
 end
 
+# ╔═╡ b1b808ec-dc3d-4cee-8496-c673c56d646d
+md"""
+
+## Summary Statistics
+
+We start by displaying some statistics and plot hourly and yearly patterns of wind production and electricity demand.
+
+Variables in Julia are defined by colons (:). eltype determines the type of the variable. Note that Julia differentiates between Integers (1) and Floating-Point (1.0)
+
+"""
+
+# ╔═╡ faade0b0-601b-49e6-bd0a-ddc6a4154d03
+describe(df)
+
+# ╔═╡ 4791e943-0e52-4a5f-9f7d-b846a90a7b5d
+df
+
+# ╔═╡ c2cda5d0-e1ae-400d-b40a-c3e80c108fda
+md"""
+In order to plot hourly and yearly patterns, we first need to combine the data at those levels. For that, we first define the groups for which the functions will be applied using `groupby`. `combine` is then used to compute the specified summary statistic. Finally, we rename the variable as `wind_mean`.
+
+"""
+
+# ╔═╡ 20e5f2fd-1efa-41cd-815d-28d178f0f2ec
+begin
+	#compute the mean for each hour and year
+df_mean = combine(groupby(df, ["hour","year"]), :wind => mean => :wind_mean, 
+    :demand => mean => :demand_mean);
+
+plot(df_mean.hour, df_mean.wind_mean, group = df_mean.year,
+	seriestype = :line, linewidth = 3,
+	title = "Wind production peaks at night...",
+    xlabel = "hour",
+    ylabel = "Wind production",
+    legend = :outerright)
+
+end
+
+# ╔═╡ cd62ad97-c180-4f07-bc5e-de753c9dcc76
+begin
+plot(df_mean.hour, df_mean.demand_mean, group = df_mean.year,
+	seriestype = :line, linewidth = 3,
+	title = "...and it is weakly correlated with demand",
+    xlabel = "hour",
+    ylabel = "Electricity Demand",
+    legend = :outerright)
+
+end
+
 # ╔═╡ bfd872df-dc2c-473b-9536-eb5736b0ec9f
 md"""
 
-## The impacts of wind: visual exploration
+## The impacts of wind: a visual exploration
 
 We will be plotting the **impacts of wind** on several outcomes of interest:
 * Emissions
@@ -70,25 +120,30 @@ We will be using the library `Binscatters` for plotting.
 
 # ╔═╡ f6d3813c-a11f-48ee-9212-15a67c71cf4b
 begin
-	binscatter(df, @formula(emis_tCO2 ~ wind_forecast + demand + fe(year)), 10, 
+binscatter(df, @formula(emis_tCO2 ~ wind_forecast), 10, 
 		seriestype = :scatterpath,
 		title = "Wind reduces emissions",
 		xlabel = "Wind forecast (GWh)",
-		ylabel = "Hourly emissions (tons CO2)", label="Forecast");
-	binscatter!(df, @formula(emis_tCO2 ~ wind + demand + fe(year)), 10,seriestype = :scatterpath)
-end
+		ylabel = "Hourly emissions (tons CO2)")
+#we can add new specifications
+#binscatter!(df, @formula(emis_tCO2 ~ wind), 10,seriestype = :scatterpath)
+end	
 
 # ╔═╡ e0e57a26-ea5f-47ad-9d13-5492cf5af1c5
+begin
 binscatter(df, @formula(wholesale_price ~ wind_forecast), 10, 
 		seriestype = :scatterpath,
-		title = "Wind reduces wholesale prices (cannibalization effect)",
+		title = "Wind reduces wholesale prices",
 		xlabel = "Wind forecast (GWh)",
 		ylabel = "Wholesale price (EUR/MWh)")
+#we can add controls
+#binscatter!(df, @formula(wholesale_price ~ wind_forecast + demand_forecast + fe(year) 			+ fe(month) + fe(hour)), 10,seriestype = :scatterpath)
+end
 
 # ╔═╡ 68429700-c94c-45f6-9765-53478aaed243
-binscatter(df, @formula(system_costs ~ wind_forecast + demand + fe(year)), 10, 
+binscatter(df, @formula(system_costs ~ wind_forecast), 10, 
 		seriestype = :scatterpath,
-		title = "Wind increases system costs (intermittency)",
+		title = "Wind increases system costs",
 		xlabel = "Wind forecast (GWh)",
 		ylabel = "System costs (EUR/MWh)")
 
@@ -121,18 +176,61 @@ md"""
 
 We can examine the endogeneity problem in the context of assessing the impact of wind on reliability and other congestion costs ("system costs").
 
-In days of very high wind, measured wind production could be lower than expected, leading to downward bias in our estimates: a difficult day with lots of wind appears as a day with low levels of wind in the data.
+On days of very high wind, measured wind production could be lower than expected, leading to a downward bias in our estimates: a difficult day with lots of wind appears as a day with low levels of wind in the data.
 
-To address this issue, one can instrument wind production with forecasted wind.
+To address this issue, one can use forecasted wind as an exogenous variable.
 
 We will be running these regressions using the `FixedEffectModels` library.
 """
 
 # ╔═╡ 2f123b31-ed84-4cb2-a399-e95d62f161c8
-reg(df, @formula(system_costs ~ wind + fe(year) + fe(month)))
+reg_w = reg(df, @formula(system_costs ~ wind + fe(year) + fe(month)))
 
-# ╔═╡ 27ce825a-53e9-4992-b31d-a3b5180941cf
-reg(df, @formula(system_costs ~ (wind ~ wind_forecast) + fe(year) + fe(month)))
+# ╔═╡ 0b5c6ac8-2efe-48c4-b6d1-11b2ab81d36e
+reg_wf = reg(df, @formula(system_costs ~  wind_forecast + fe(year) + fe(month)))
+
+# ╔═╡ 3e595407-3f72-4e4d-9711-12c1e1092d29
+md"""
+Another possible problem is that system costs from wind production may be realized in hours with no wind. In this case, the hourly regression coefficient will be downward biased. To circumvent this issue, we can estimate the same regression at a daily level.
+
+For that, we compute the total system costs as well as total wind power.
+
+"""
+
+# ╔═╡ f8e0a96c-4c5e-4151-a1eb-dea522688c3a
+begin 
+df.day_id = string.(df.year,df.month,df.day)
+#In Julia, row-wise operations are defined with a dot.
+	
+df_day = combine(groupby(df, ["day_id","year","month"]), :wind_forecast => sum => :wind_forecast, :system_costs => sum => :system_costs);
+	
+end	
+
+# ╔═╡ b2ea16c0-c7cd-4bef-ba95-a214b9a155a9
+reg_d = reg(df_day, @formula(system_costs ~  wind_forecast + fe(year) + fe(month)))
+
+# ╔═╡ d846e02a-29b8-4115-9384-7770427a8938
+begin
+	using RegressionTables
+
+	regtable(reg_w, reg_wf,reg_d, regression_statistics = [:nobs,:adjr2])
+
+end
+
+# ╔═╡ 12b11415-3054-41f9-8c51-8fa3573b2003
+md"""
+We can display the output of our regressions using the `RegressionTables` package (similar to `stargazer` in R).
+"""
+
+# ╔═╡ 57dfc4bb-e31a-4548-9e63-86bd2640d9aa
+md"""
+This package also allows you to generate Latex output:
+"""
+
+# ╔═╡ 5fe05174-00d7-400d-bcc7-62e1cd8efbe2
+regtable(reg_w,reg_wf,reg_d; renderSettings = latexOutput())
+# To create a Latex document with the table simply specify the name of the document:
+# regtable(reg_w,reg_wf; renderSettings = latexOutput(table.tex))
 
 # ╔═╡ 35e0d327-2165-474d-85fc-79bee35ea86e
 md"""
@@ -145,23 +243,28 @@ In the wholesale market, this implies that renewables no longer have an incentiv
 
 We will split the data in two to examine the change in the distribution of wholesale prices around the policy change.
 
-**Note:** This is an event study, so there are other changes happening in the market. The idea here is to show major effects of the policy, but a proper quantification requires more explicit control of confounders.
 
 """
 
 # ╔═╡ 9a6f5569-ff56-4f13-9ab4-842ac8ae1f96
 begin
 	df.policy = (((df.year .> 2014) .| ((df.year.==2014) .& (df.month .> 5))));
-	dfpre = subset(df, :policy => ByRow(==(0)));
-	dfpost = subset(df, :policy => ByRow(==(1)));
+	df_policy = filter(row -> 2012 < row.year < 2016 ,df);
 	
-	# focus only on 2013-2015 data
-	dfpre = subset(dfpre, :year => ByRow(>(2012)));
-	dfpost = subset(dfpost, :year => ByRow(<(2016)));
-	
-	histogram(dfpre.wholesale_price, label="Pre")
-	histogram!(dfpost.wholesale_price, label="Post")
+	histogram(df_policy.wholesale_price, group = df_policy.policy,
+	alpha = 0.7,
+	label = ["pre" "post"])
 end
+
+# ╔═╡ 3bb93da7-d587-49af-9ffe-13fb9bb5f3a0
+md"""
+
+**Note:** This is an event study, so there are other changes happening in the market. The idea here is to show major effects of the policy, but proper quantification requires more explicit control of confounders. To start with, although not exhaustive, we can estimate the effect of wind forecast after the policy change.
+
+"""
+
+# ╔═╡ 6b0b65f7-6d54-4b1d-b323-642f1da02b0d
+reg(df, @formula(wholesale_price ~ wind_forecast*policy + demand_forecast + fe(hour) + fe(year) + fe(month)))
 
 # ╔═╡ 102ae65a-ec4b-4bc3-9b4f-65c9d5df6fdd
 md"""
@@ -174,10 +277,9 @@ We can plot system costs before and after the change.
 
 # ╔═╡ 83f9dcff-43a2-4e0a-b93b-45ba30bc6849
 begin
-	binscatter(dfpre, @formula(system_costs ~ wind_forecast), 10, 
-		label="Pre", seriestype = :linearfit)
-	binscatter!(dfpost, @formula(system_costs ~ wind_forecast), 10,
-		label="Post", seriestype = :linearfit)
+binscatter(groupby(df_policy, :policy), @formula(system_costs ~ wind_forecast), 10, 
+	 seriestype = :linearfit,
+		legend = :topleft)
 end
 
 # ╔═╡ 124274ea-fda5-4736-92cb-9dbcefda15ff
@@ -188,10 +290,9 @@ Consumers were still worse off due to the increase in prices. Wind price reducti
 
 # ╔═╡ 67186641-0036-41a1-bd12-a75b5bc220c9
 begin
-	binscatter(dfpre, @formula(total_price ~ wind_forecast), 10, 
-		label="Pre", seriestype = :linearfit)
-	binscatter!(dfpost, @formula(total_price ~ wind_forecast), 10, 
-		label="Post", seriestype = :linearfit)
+binscatter(groupby(df_policy, :policy), @formula(total_price ~ wind_forecast), 10, 
+	 seriestype = :linearfit,
+		legend = :topleft)
 end
 
 # ╔═╡ 272c16a1-b169-483f-bd81-cd83fa415098
@@ -199,9 +300,9 @@ md"""
 
 ## Follow-up exercises
 
-1. What is the environmental benefit of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
+1. What is the correlation of wind and demand? How could that affect the valuation of wind power?
 
-2. What is the correlation of wind and demand? How could that affect the valuation of wind power?
+2. What is the environmental benefit of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
 
 """
 

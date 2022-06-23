@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -95,6 +95,24 @@ data["a"]  # Example of output, intercept of demand for 4 regions and 100 period
 # ╔═╡ ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
 data
 
+# ╔═╡ ad558751-c71b-4baa-aaa6-7e5e326189f9
+data["mc"] # Marginal cost of each utility providing electricity to each of the 4 regions
+
+
+# ╔═╡ b529458f-0ed8-421c-99e2-0f2a1480cc1c
+md"""
+We can explore how the network is specified (see slides 85 / 86 from lecture 3). We have 5 lines: (4 to 2 and 3, 2 and 3 to 1 and 2 to 3) with a maximum capacity.
+
+With that, every unit of electricity produced in each of the 4 regions will flow across regions according to flow factors `fct` (taking CA as reference).
+
+
+"""
+
+
+# ╔═╡ fab9ea6e-2b17-44c1-9b8a-443c2c249ad1
+df_lines = Dict("lines" => data["lines"], "flow" =>data["fct"])
+
+
 # ╔═╡ 5573dd3e-8a67-459c-84f6-06671d35a682
 md"""
 
@@ -131,13 +149,125 @@ The model follows similar steps from yesterday:
 6. Declare constraints, [New] including those for the environmental regulation and the transmission lines.
 """
 
+# ╔═╡ 8af6aa91-c10b-45a8-a9c5-b41e500e1eca
+md"""
+We will start by considering the case where all electricity producers are regulated under the same carbon pricing regime.
+"""
+
+
+# ╔═╡ e05fb9ab-1550-4a8f-8403-b8732aca0bc8
+function clear_market_at_t_baseline(d::Dict{String,Any};
+    t=1, tax=17.0)
+
+model = Model(
+    optimizer_with_attributes(
+        Ipopt.Optimizer, "print_level"=>0)
+    );
+
+    # Set market inputs
+    R = size(d["a"],1);  # number of regions
+    U = size(d["mc"],2); #number of utilities
+    L = size(d["lines"],1); #number of lines
+
+    p0 = d["a"]./d["b"] #auxiliary parameter to don't write everytime a/b
+
+    # define costs of carbon: all emissions are taxed uniformly
+    er_tax = d["er"] 
+
+    # variables to solve for
+    @variable(model, price[1:R]);
+    @variable(model, demand[1:R]);
+    @variable(model, yflow[1:R-1]);  # swing node is CA. How much is being sent to CA (y < 0 implies that CA is exporting)
+    @variable(model, q[1:R, 1:U]>=0);
+    @variable(model, q_ca[1:R, 1:U]>=0);  # quantity sent to CA for accounting purposes. 
+    @variable(model, qmr_ca[1:R]>=0);  # quantity must-run sent to CA (no emissions): hydro and renewables
+
+    # summary variables (function of variables to solve):
+    @variable(model, surplus);
+    @variable(model, totalcost);  # fuel cost
+    @variable(model, totalecost);  # taxed emissions costs
+    @variable(model, totale[1:R]); #total emissions
+    @variable(model, totale_ca);  # emissions based on accounting quantity
+    @variable(model, totale_ca_claimed);  # emissions based on accounting quantity but the true rate (check)
+    @variable(model, totale_ca_instate);  # emissions based on accounting quantity but the true rate (check)
+
+    # definition of objective function
+    @NLobjective(model, Max, surplus - totalcost - totalecost);
+
+
+    @constraint(model, surplus == sum(0.5 * (p0[r, t] + price[r]) * demand[r] for r in 1:R));
+    @constraint(model, totalcost == sum(q[r,i] * d["mc"][r, i] for r in 1:R, i in 1: U));
+    @constraint(model, totalecost == sum(q[r, i] * d["er"][r, i] * tax for r in 1:R, i in 1: U));
+    @constraint(model, [r=1:R], totale[r] == sum(q[r, i] * d["er"][r, i] for i in 1: U));
+    @constraint(model,	totale_ca == sum(q_ca[r, i] * d["er"][r, i] for r in 1:R, i in 1: U));
+    @constraint(model, totale_ca_instate == 
+    sum(q_ca[r, i] * d["er"][r, i] * d["isca"][r, i] for r in 1:R, i in 1: U));
+    @constraint(model, totale_ca_claimed == sum(q_ca[r, i] * er_tax[r, i] for r in 1:R, i in 1: U));
+
+    # definition demand
+    @constraint(model, [r=1:R], demand[r] == (d["a"][r, t] - d["b"][r, t] * price[r]));
+
+    # constraint quantities to 95% of name plate capacity
+    @constraint(model, [r=1:R, i=1:U], q[r, i] <= 0.95 *  d["mw"][r, i]/1000.0); 
+
+    # congestion constraint: we require a minimum generation for some units
+    @constraint(model, [r=1:R, i=1:U], q[r, i] >= d["cf"][r, i] * d["flag"][r, i] * d["mw"][r, i]/1000.0);
+
+    # market clearing: demand = production in CA + renewables + imports (or - exports)
+    @constraint(model, demand[1] == sum(q[1,i] for i=1:U) + d["qmr"][1, t] + sum(yflow[z] for z in 1:R-1));
+    @constraint(model, [r=2:R], demand[r] + yflow[r-1] == sum(q[r,i] for i=1:U) + d["qmr"][r, t]);
+
+    # transmission line
+    @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) <= d["lines"][l]);
+    @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) >= -d["lines"][l]); #see appendix
+
+    # california accounting
+    @constraint(model, demand[1] == sum(q_ca[r,i] for r in 1:R, i in 1: U) + sum(qmr_ca[r] for r in 1:R));
+    @constraint(model, [r=1:R, i=1:U], q_ca[r, i] <=  q[r, i]);  # CA quantity
+    @constraint(model, [r=1:R, i=1:U], q_ca[r, i] >=  d["istax"][r,i] * q[r, i]);  # equal to q if CA/taxed
+    @constraint(model, [r=1:R, i=1:U], q_ca[r, i] >=  d["isca"][r,i] * q[r, i]);  # equal to q if CA/taxed
+    @constraint(model, qmr_ca[1] == d["qmr"][1, t]);  # equal to q if CA
+    @constraint(model, [r=2:R], qmr_ca[r] <=   d["qmr"][r, t]);  # CA quantity from hydro + renewables
+
+    optimize!(model)
+
+    status = @sprintf("%s",JuMP.termination_status(model));
+
+    if ((status=="LOCALLY_SOLVED") | (status=="ALMOST_LOCALLY_SOLVED"))
+    results = Dict("status" => status,
+            "surplus" => JuMP.value.(surplus),
+            "totalcost" => JuMP.value.(totalcost),
+            "totalecost" => JuMP.value.(totalecost),
+            "totale" => JuMP.value.(totale),
+            "totale_ca" => JuMP.value.(totale_ca),
+            "totale_ca_claimed" => JuMP.value.(totale_ca_claimed),
+            "totale_ca_instate" => JuMP.value.(totale_ca_instate),
+            "price" => JuMP.value.(price),
+            "demand" => JuMP.value.(demand),
+            "yflow" => JuMP.value.(yflow),
+            "q" => JuMP.value.(q),
+            "q_ca" => JuMP.value.(q_ca),
+            "qmr_ca" => JuMP.value.(qmr_ca));
+    return results
+    else
+    results = Dict("status" => status);
+    return results
+    end
+
+end
+
+
+
+# ╔═╡ c1ea130d-748d-490e-9fa7-6f55480249e3
+clear_market_at_t_baseline(data, tax=17.0)
+
 # ╔═╡ 9c2b7ee6-b218-4409-96e5-d08fe098e221
 md"""
 
-We consider several cases.
+Now we augment the model to consider several cases.
 
 1. No regulation, tax is 0.
-2. Uniform tax, every region.
+2. Uniform tax, every region (corresponding to the case discussed above).
 3. CA tax only.
 4. Tax of imports at default rate, with opt-out.
 5. Tax of imports at default rate, no opt-out.
@@ -582,9 +712,9 @@ version = "0.8.5"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
+git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.16.1+0"
+version = "1.16.1+1"
 
 [[Calculus]]
 deps = ["LinearAlgebra"]
@@ -838,9 +968,9 @@ version = "0.21.0+0"
 
 [[Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "7bf67e9a481712b3dbe9cb3dac852dc4b1162e02"
+git-tree-sha1 = "a32d672ac2c967f3deb8a81d828afc739c838a06"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.68.3+0"
+version = "2.68.3+2"
 
 [[Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -861,9 +991,9 @@ version = "0.9.14"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
-git-tree-sha1 = "8a954fed8ac097d5be04921d595f741115c1b2ad"
+git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "2.8.1+0"
+version = "2.8.1+1"
 
 [[IniFile]]
 deps = ["Test"]
@@ -956,6 +1086,12 @@ git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.1+0"
 
+[[LERC_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
+version = "3.0.0+1"
+
 [[LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e5b909bcf985c5e2605737d2ce278ed791b89be6"
@@ -998,9 +1134,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "761a393aeccd6aa92ec3515e428c26bf99575b3b"
+git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+0"
+version = "3.2.2+1"
 
 [[Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
@@ -1033,10 +1169,10 @@ uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
 version = "2.35.0+0"
 
 [[Libtiff_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "340e257aada13f95f98ee352d316c3bed37c8ab9"
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "c9551dd26e31ab17b86cbd00c2ede019c08758eb"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.3.0+0"
+version = "4.3.0+1"
 
 [[Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1163,9 +1299,9 @@ version = "1.10.6"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "7937eda4681660b4d6aeeecc2f7e1c81c8ee4e2f"
+git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
-version = "1.3.5+0"
+version = "1.3.5+1"
 
 [[OpenBLAS32_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1264,9 +1400,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
-git-tree-sha1 = "ad368663a5e20dbb8d6dc2fddeefe4dae0781ae8"
+git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
 uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
-version = "5.15.3+0"
+version = "5.15.3+1"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -1652,9 +1788,9 @@ version = "1.6.38+0"
 
 [[libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "c45f4e40e7aafe9d086379e5578947ec8b95a8fb"
+git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+0"
+version = "1.3.7+1"
 
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1693,9 +1829,15 @@ version = "0.9.1+5"
 # ╠═1a656c1c-6b54-47c1-8764-06990f4b651b
 # ╠═c90d4fc7-fe8c-4883-b2de-745d2e784c12
 # ╠═ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
+# ╠═ad558751-c71b-4baa-aaa6-7e5e326189f9
+# ╟─b529458f-0ed8-421c-99e2-0f2a1480cc1c
+# ╠═fab9ea6e-2b17-44c1-9b8a-443c2c249ad1
 # ╟─5573dd3e-8a67-459c-84f6-06671d35a682
 # ╟─75c278e2-a8c8-4d21-b79e-555604febfbf
 # ╟─6049b514-2227-4b24-89f4-b2e01fe9db09
+# ╟─8af6aa91-c10b-45a8-a9c5-b41e500e1eca
+# ╠═e05fb9ab-1550-4a8f-8403-b8732aca0bc8
+# ╠═c1ea130d-748d-490e-9fa7-6f55480249e3
 # ╟─9c2b7ee6-b218-4409-96e5-d08fe098e221
 # ╠═905c4477-10a0-4479-8ff5-8cfadb69c23f
 # ╠═11da5515-5f09-4d7f-9450-e6145b4ca585

@@ -526,9 +526,9 @@ md"""
 
 1. Imagine each technology is a firm, which now might exercise market power. Can you modify clear\_market\_foc to account for market power as in BMS (2008)?
 
-2. The function is prepared to take several amounts of solar and wind. What are the impacts on prices as you increase solar and wind? Save prices for different values of wind or solar investment and plot them. Does your answer depend a lot on the number of clusters?
+2(*). The function is prepared to take several amounts of solar and wind. What are the impacts on prices as you increase solar and wind? Save prices for different values of wind or solar investment and plot them. Does your answer depend a lot on the number of clusters?
 
-3. [Harder] Making some assumptions on the fixed costs of solar and wind, can you expand the model to solver for investment? This will require a FOC for the zero profit entry condition. In Bushnell (2011) and Reguant (2019), that FOC might not be satisfied (zero investment), so it is also a complementarity problem.
+3(*). [Harder] Making some assumptions on the fixed costs of solar and wind, can you expand the model to solver for investment? This will require a FOC for the zero profit entry condition. In Bushnell (2011) and Reguant (2019), that FOC might not be satisfied (zero investment), so it is also a complementarity problem.
 
 """
 

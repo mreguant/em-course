@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.6
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -299,7 +299,8 @@ md"""
 
 1. What is the correlation of wind and demand? How could that affect the valuation of wind power?
 
-2. What is the environmental benefit of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions.
+2 (*). What is the environmental benefit of wind power in this market per unit of wind? Try to quantify that by regressing emissions on wind and converting it to a monetary amount using a valuation for emissions reductions. 
+Estimate the total welfare effects of wind production. For that, you need to add to the environmental benefit the consumer and producer surplus. With respect to the producer surplus assume that the LCOE ranges between 50 to 90 €/MWh. How does your answer depend on the monetary value of reducing emissions?
 
 """
 

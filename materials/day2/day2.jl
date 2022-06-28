@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.6
 
 using Markdown
 using InteractiveUtils
@@ -68,6 +68,15 @@ end
 # ╔═╡ 4f4da19d-d9a4-4880-aefe-0335bc487515
 df
 
+# ╔═╡ 5c7d1830-f6f5-412b-8e20-997bd38d5255
+describe(df)
+
+# ╔═╡ d29b8dae-3090-4eda-9c73-4e19d20c179b
+plot(rownumber.(eachrow(df)),df.hydronuc)
+
+# ╔═╡ 29f3a38c-a864-4247-8443-caf6e7659295
+
+
 # ╔═╡ 6df1c2bb-7c01-4b78-b370-4a5232d5d4e7
 md"""
 
@@ -108,7 +117,11 @@ begin
 			"wind_cap", "solar_cap", "hydronuc"]);
 	dfclust.weights = counts(R);
 	first(dfclust, 5)
+	
 end
+
+# ╔═╡ be45a406-3d2b-4b20-ad5f-b39f7bf46164
+dfclust
 
 # ╔═╡ 95b8c122-22f2-454a-9737-9da7c57fa929
 md"""
@@ -122,7 +135,8 @@ Here is an example with prices. The two distributions are very similar.
 # ╔═╡ ae54a543-8c30-444f-a6f4-32589e33072d
 begin
 	histogram(df.price, fillalpha=.2, nbins=20, label="Data")
-	histogram!(dfclust.price,weights=dfclust.weights, fillalpha=.2, nbins=20, 
+	histogram!(dfclust.price,weights=dfclust.weights, 
+	fillalpha=.2, nbins=20, 
 		label="Clusters")
 end
 
@@ -149,13 +163,13 @@ We can also check that the correlation between the main variables of interest re
 # ╔═╡ d625dc73-32c6-4d52-934a-e34e06ec8c94
 begin
 	# with original data
-	@df df cornerplot(cols([:price, :imports,:wind_cap,:solar_cap]), grid = false)
+	@df df cornerplot(cols([:price, :imports,:wind_cap,:solar_cap]), grid = false, compact=true)
 end
 
 # ╔═╡ d7c41056-1933-4dca-a724-fb3abd29be91
 begin
 	# with synthetic data, note issue that weights are not allowed in Julia function
-	@df dfclust cornerplot(cols([:price, :imports,:wind_cap,:solar_cap]), grid = false)
+	@df dfclust cornerplot(cols([:price, :imports,:wind_cap,:solar_cap]), grid = false,compact = true)
 end
 
 # ╔═╡ d6118ed7-ba88-4d36-9ad5-015eaffbb08e
@@ -384,7 +398,7 @@ Compared to the previous approach:
 # ╔═╡ 0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
 ## Clear market based on first-order conditions
 function clear_market_foc(data::DataFrame, tech::DataFrame; 
-		wind_gw = 5.0, solar_gw = 2.0)
+		wind_gw = 5.0, solar_gw = 2.0,theta=1)
 	
 	# We declare a model
     model = Model(
@@ -406,7 +420,7 @@ function clear_market_foc(data::DataFrame, tech::DataFrame;
 	@variable(model, u1[1:T, 1:I], Bin);  # if tech used
 	@variable(model, u2[1:T, 1:I], Bin);  # if tech at max
 
-	@objective(model, Max, sum(price[t] * data.weights[t] for t=1:T));
+	@objective(model, Min, sum(price[t] * data.weights[t] for t=1:T));
 	
 	# Market clearing
 	@constraint(model, [t=1:T], 
@@ -440,10 +454,10 @@ function clear_market_foc(data::DataFrame, tech::DataFrame;
 	# Constraints on optimality 
 	M = 1e3;
 	@constraint(model, [t=1:T,i=1:I],
-		price[t] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
+		price[t] -  theta/(data.b[t]+data.bm[t])*quantity[t,i] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
 		>= -M * (1-u1[t,i]));
 	@constraint(model, [t=1:T,i=1:I],
-		price[t] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
+		price[t] - theta/(data.b[t]+data.bm[t])*quantity[t,i] - tech.c[i] - tech.c2[i]*quantity[t,i] - shadow[t,i] 
 		<= 0.0);
 	@constraint(model, [t=1:T,i=1:I], shadow[t,i] <= M*u2[t,i]);
 	
@@ -483,8 +497,11 @@ function clear_market_foc(data::DataFrame, tech::DataFrame;
 	
 end
 
+# ╔═╡ a7f831b9-4776-4cd3-b4cc-ca69e51ef8e8
+
+
 # ╔═╡ 8e135ba9-3e4f-4ef5-98cd-a807146f6af7
-results_foc = clear_market_foc(dfclust, tech);
+results_foc = clear_market_foc(dfclust, tech,theta=0);
 
 # ╔═╡ e86d243e-fac9-45b1-810a-231e3ca93c2d
 results_foc["avg_price"]
@@ -1812,9 +1829,13 @@ version = "0.9.1+5"
 # ╟─a38335ed-32a3-4168-9cc4-a83af5fc02dd
 # ╠═3f7c3d49-664d-4ec6-baa6-43ff17187e79
 # ╠═4f4da19d-d9a4-4880-aefe-0335bc487515
+# ╠═5c7d1830-f6f5-412b-8e20-997bd38d5255
+# ╠═d29b8dae-3090-4eda-9c73-4e19d20c179b
+# ╠═29f3a38c-a864-4247-8443-caf6e7659295
 # ╟─6df1c2bb-7c01-4b78-b370-4a5232d5d4e7
 # ╠═d70ca10c-01b9-42c2-9d62-d4da6285f1ba
 # ╠═ed2bb458-db38-41b1-959a-634cd076170b
+# ╠═be45a406-3d2b-4b20-ad5f-b39f7bf46164
 # ╟─95b8c122-22f2-454a-9737-9da7c57fa929
 # ╠═ae54a543-8c30-444f-a6f4-32589e33072d
 # ╟─3d72810a-e19f-4d04-8544-ef97c9044691
@@ -1840,6 +1861,7 @@ version = "0.9.1+5"
 # ╠═b0fd10a3-25e7-40a9-8368-1dc31b60ca25
 # ╟─71c1e145-7c9d-4b83-b23b-04740f4c34a8
 # ╠═0f34cddd-37f5-45c6-bc24-bd8bc7cc6524
+# ╠═a7f831b9-4776-4cd3-b4cc-ca69e51ef8e8
 # ╠═8e135ba9-3e4f-4ef5-98cd-a807146f6af7
 # ╠═e86d243e-fac9-45b1-810a-231e3ca93c2d
 # ╠═e9638f3f-4b3e-4349-8dca-0570002b8d3f

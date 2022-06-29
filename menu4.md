@@ -12,7 +12,7 @@ In the practical session, we will learn how to use machine learning tools to est
 
 ## Lecture
 
-* **Slides**: [day4.pdf](/materials/day4/day4.pdf), [schools_bgse.pdf](/materials/day4/schools_bgse.pdf), [rtp_project1.pdf](/materials/day4/rtp_project1.pdf)
+* **Slides**: [day4.pdf](/materials/day4/day4.pdf), [schools_bgse.pdf](/materials/day4/schools_bgse.pdf), [slides_rtp.pdf](/materials/day4/slides_rtp.pdf)
 
 ## Practical exercise: Dynamic pricing in retail
 

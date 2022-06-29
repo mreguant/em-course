@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.6
 
 using Markdown
 using InteractiveUtils
@@ -38,7 +38,7 @@ We first load relevant libraries.
 # This is not saying great things about the length of my coding lines, including this line.
 html"""<style>
 main {
-    max-width: 900px;
+    max-width: 700px;
 }
 """
 
@@ -60,7 +60,7 @@ Here I provide a description of the variables (available in the online appendix 
 
 * a: Electricity demanded when price is zero.
 * b: Slope of electricity demand curve.
-* qmr: Quantity of electricity from wind, solar, nuclear, and hydroelectric energy sources, which “must run” in the model.
+* qmr: Quantity of electricity from wind, solar, nuclear, and hydroelectric energy sources, which “must run” in the model for each region
 * mc: Marginal cost of electricity production.
 * er: Emissions rate.
 * mw: Capacity.
@@ -90,28 +90,28 @@ begin
 end
 
 # ╔═╡ c90d4fc7-fe8c-4883-b2de-745d2e784c12
-data["a"]  # Example of output, intercept of demand for 4 regions and 100 periods
+data["a"]  # intercept of demand for 4 regions and 100 periods
 
 # ╔═╡ ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
-data
-
-# ╔═╡ ad558751-c71b-4baa-aaa6-7e5e326189f9
 data["mc"] # Marginal cost of each utility providing electricity to each of the 4 regions
 
+# ╔═╡ a8a98037-00e4-40b5-8997-3914f6d5c260
+sum(data["isca"])
 
-# ╔═╡ b529458f-0ed8-421c-99e2-0f2a1480cc1c
+# ╔═╡ 58d25869-b56f-4881-929e-0016bcf38c94
+data["istax"]
+
+# ╔═╡ 8419e538-e7a0-4e26-88e4-d00227918c1a
 md"""
-We can explore how the network is specified (see slides 85 / 86 from lecture 3). We have 5 lines: (4 to 2 and 3, 2 and 3 to 1 and 2 to 3) with a maximum capacity.
+**Note:** We can explore how the network is specified (see slides 85 / 86 from lecture 3). We have 5 lines: (4 to 2 and 3, 2 and 3 to 1 and 2 to 3) with a maximum capacity.
 
-With that, every unit of electricity produced in each of the 4 regions will flow across regions according to flow factors `fct` (taking CA as reference).
+With that, every unit of electricity produced in each of the 4 regions will flow across regions according to flow factors `fct` (taking CA as reference)  
 
 
 """
 
-
-# ╔═╡ fab9ea6e-2b17-44c1-9b8a-443c2c249ad1
+# ╔═╡ 6635ab62-9743-448b-abc7-c77391a83c9f
 df_lines = Dict("lines" => data["lines"], "flow" =>data["fct"])
-
 
 # ╔═╡ 5573dd3e-8a67-459c-84f6-06671d35a682
 md"""
@@ -149,13 +149,12 @@ The model follows similar steps from yesterday:
 6. Declare constraints, [New] including those for the environmental regulation and the transmission lines.
 """
 
-# ╔═╡ 8af6aa91-c10b-45a8-a9c5-b41e500e1eca
+# ╔═╡ 6ae6b398-c170-4404-9b74-1f3c3237fe66
 md"""
 We will start by considering the case where all electricity producers are regulated under the same carbon pricing regime.
 """
 
-
-# ╔═╡ e05fb9ab-1550-4a8f-8403-b8732aca0bc8
+# ╔═╡ 17599268-10f6-4fc6-bdef-5668a349e7ea
 function clear_market_at_t_baseline(d::Dict{String,Any};
     t=1, tax=17.0)
 
@@ -188,8 +187,8 @@ model = Model(
     @variable(model, totalecost);  # taxed emissions costs
     @variable(model, totale[1:R]); #total emissions
     @variable(model, totale_ca);  # emissions based on accounting quantity
-    @variable(model, totale_ca_claimed);  # emissions based on accounting quantity but the true rate (check)
-    @variable(model, totale_ca_instate);  # emissions based on accounting quantity but the true rate (check)
+    @variable(model, totale_ca_claimed);  # emissions based on accounting quantity but the true rate 
+    @variable(model, totale_ca_instate);  # emissions based on accounting quantity but the true rate 
 
     # definition of objective function
     @NLobjective(model, Max, surplus - totalcost - totalecost);
@@ -208,15 +207,16 @@ model = Model(
     @constraint(model, [r=1:R], demand[r] == (d["a"][r, t] - d["b"][r, t] * price[r]));
 
     # constraint quantities to 95% of name plate capacity
-    @constraint(model, [r=1:R, i=1:U], q[r, i] <= 0.95 *  d["mw"][r, i]/1000.0); 
+    @constraint(model, [r=1:R, i=1:U], q[r, i] <= 0.95 *  d["mw"][r, i]/1000.0); #mw = capacity
 
     # congestion constraint: we require a minimum generation for some units
     @constraint(model, [r=1:R, i=1:U], q[r, i] >= d["cf"][r, i] * d["flag"][r, i] * d["mw"][r, i]/1000.0);
-
+	#cf=capacity factor (similar to the 0.95 above)
+	
     # market clearing: demand = production in CA + renewables + imports (or - exports)
     @constraint(model, demand[1] == sum(q[1,i] for i=1:U) + d["qmr"][1, t] + sum(yflow[z] for z in 1:R-1));
     @constraint(model, [r=2:R], demand[r] + yflow[r-1] == sum(q[r,i] for i=1:U) + d["qmr"][r, t]);
-
+	
     # transmission line
     @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) <= d["lines"][l]);
     @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) >= -d["lines"][l]); #see appendix
@@ -258,8 +258,12 @@ end
 
 
 
-# ╔═╡ c1ea130d-748d-490e-9fa7-6f55480249e3
-clear_market_at_t_baseline(data, tax=17.0)
+
+# ╔═╡ d093b417-2370-43b2-9408-5e12a00c017e
+results_baseline= clear_market_at_t_baseline(data, tax=17.0)
+
+# ╔═╡ 76d2ea17-53eb-4cf1-99d2-2741b00340eb
+
 
 # ╔═╡ 9c2b7ee6-b218-4409-96e5-d08fe098e221
 md"""
@@ -267,16 +271,17 @@ md"""
 Now we augment the model to consider several cases.
 
 1. No regulation, tax is 0.
-2. Uniform tax, every region (corresponding to the case discussed above).
+2. Uniform tax, every region (it corresponds to the case discussed above).
 3. CA tax only.
 4. Tax of imports at default rate, with opt-out.
 5. Tax of imports at default rate, no opt-out.
 
 """
 
+
 # ╔═╡ 905c4477-10a0-4479-8ff5-8cfadb69c23f
 function clear_market_at_t(d::Dict{String,Any};
-		t=1, case=2, tax=17.0, default=0.428, beta=1.0)
+		t=1, case=2, tax=17.0, default=0.428)
 
     model = Model(
         optimizer_with_attributes(
@@ -285,17 +290,17 @@ function clear_market_at_t(d::Dict{String,Any};
 
     # Set market inputs
     R = size(d["a"],1);  # number of regions
-    U = size(d["mc"],2);
-    L = size(d["lines"],1);
+    U = size(d["mc"],2); #number of utilities
+    L = size(d["lines"],1); #number of lines
 
-    p0 = d["a"]./d["b"]
+    p0 = d["a"]./d["b"] #auxiliary parameter to don't write everytime a/b
 
     # define costs of carbon depending on policy
-    if case==1  # no regulation
+    if  case==1  # no regulation
         er_tax = d["er"];
         tax = 0.0;
     elseif case==2  # uniform tax
-        er_tax = d["er"];
+        er_tax = d["er"]; #tax already defined
     elseif case==3  # only CA tax
         er_tax = d["er"] .* d["istax"];
     elseif case==4  # opt-out default
@@ -310,30 +315,31 @@ function clear_market_at_t(d::Dict{String,Any};
     # variables to solve for
     @variable(model, price[1:R]);
     @variable(model, demand[1:R]);
-    @variable(model, yflow[1:R-1]);  # swing node is CA
+    @variable(model, yflow[1:R-1]);  # swing node is CA. How much is being sent to CA (y < 0 implies that CA is exporting)
     @variable(model, q[1:R, 1:U]>=0);
-    @variable(model, q_ca[1:R, 1:U]>=0);  # quantity sent to CA for accounting purposes
-    @variable(model, qmr_ca[1:R]>=0);  # quantity must-run sent to CA (no emissions)
+    @variable(model, q_ca[1:R, 1:U]>=0);  # quantity sent to CA for accounting purposes. 
+    @variable(model, qmr_ca[1:R]>=0);  # quantity must-run sent to CA (no emissions): hydro and renewables
 
-    # summary variables
+    # summary variables (function of variables to solve):
     @variable(model, surplus);
     @variable(model, totalcost);  # fuel cost
     @variable(model, totalecost);  # taxed emissions costs
-    @variable(model, totale[1:R]);
+    @variable(model, totale[1:R]); #total emissions
     @variable(model, totale_ca);  # emissions based on accounting quantity
-    @variable(model, totale_ca_claimed);  # emissions based on accounting quantity but the true rate
-    @variable(model, totale_ca_instate);  # emissions based on accounting quantity but the true rate
-
-    @NLobjective(model, Max, surplus - totalcost - totalecost);
+    @variable(model, totale_ca_claimed);  # emissions based on accounting quantity but the true rate 
+    @variable(model, totale_ca_instate);  # emissions based on accounting quantity but the true rate 
 
     # definition of objective function
+    @NLobjective(model, Max, surplus - totalcost - totalecost);
+
+    
     @constraint(model, surplus == sum(0.5 * (p0[r, t] + price[r]) * demand[r] for r in 1:R));
     @constraint(model, totalcost == sum(q[r,i] * d["mc"][r, i] for r in 1:R, i in 1: U));
     if case==2
         @constraint(model, totalecost == sum(q[r, i] * d["er"][r, i] * tax for r in 1:R, i in 1: U));
     elseif case==5
         @constraint(model, totalecost == sum(q_ca[r, i] * er_tax[r, i] * tax for r in 1:R, i in 1: U) 
-			+ sum(qmr_ca[r] * default * tax for r in 2:R));
+			+ sum(qmr_ca[r] * default * tax for r in 2:R)); #sources that are emission-free also pay
     else
         @constraint(model, totalecost == sum(q_ca[r, i] * er_tax[r, i] * tax for r in 1:R, i in 1: U));        
     end
@@ -364,7 +370,7 @@ function clear_market_at_t(d::Dict{String,Any};
 
     # transmission line
     @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) <= d["lines"][l]);
-    @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) >= -d["lines"][l]);
+    @constraint(model, [l=1:L], sum(d["fct"][z,l] * yflow[z] for z in 1:R-1) >= -d["lines"][l]); #see appendix
 
     # california accounting
     @constraint(model, demand[1] == sum(q_ca[r,i] for r in 1:R, i in 1: U) + sum(qmr_ca[r] for r in 1:R));
@@ -372,7 +378,7 @@ function clear_market_at_t(d::Dict{String,Any};
     @constraint(model, [r=1:R, i=1:U], q_ca[r, i] >=  d["istax"][r,i] * q[r, i]);  # equal to q if CA/taxed
     @constraint(model, [r=1:R, i=1:U], q_ca[r, i] >=  d["isca"][r,i] * q[r, i]);  # equal to q if CA/taxed
     @constraint(model, qmr_ca[1] == d["qmr"][1, t]);  # equal to q if CA
-    @constraint(model, [r=2:R], qmr_ca[r] <=  beta * d["qmr"][r, t]);  # CA quantity from hydro + renewables
+    @constraint(model, [r=2:R], qmr_ca[r] <=   d["qmr"][r, t]);  # CA quantity from hydro + renewables
 
     optimize!(model)
 
@@ -402,7 +408,11 @@ function clear_market_at_t(d::Dict{String,Any};
 end
 
 # ╔═╡ 11da5515-5f09-4d7f-9450-e6145b4ca585
-clear_market_at_t(data, tax=17.0, case=2)
+# ╠═╡ show_logs = false
+results_1 = clear_market_at_t(data, tax=17.0, case=1)
+
+# ╔═╡ d00b6d49-846c-4885-94a8-5259e0ce847b
+sum(results_1["totale"])
 
 # ╔═╡ 4c738b38-8269-4cba-a321-64881f41c185
 md""" 
@@ -416,7 +426,7 @@ Now that we have a function that generates outcomes from one hour, we can loop t
 """
 
 # ╔═╡ 024510e3-b1b6-449b-9a31-93f72449ebe1
-function clear_market_loop(d::Dict{String,Any}; T=100, case=2, tax=17.0, default=0.428, beta=1.0)
+function clear_market_loop(d::Dict{String,Any}; T=100, case=2, tax=17.0, default=0.428)
 
     # prepare buckets
     status = Any[];
@@ -439,7 +449,7 @@ function clear_market_loop(d::Dict{String,Any}; T=100, case=2, tax=17.0, default
     
     for t in 1:T # limit to make computation faster!
         res = clear_market_at_t(data, t=t,
-            case=case, tax=tax, default=default, beta=beta)
+            case=case, tax=tax, default=default)
 		if ((res["status"]=="LOCALLY_SOLVED") | (res["status"]=="ALMOST_LOCALLY_SOLVED"))
 			push!(status, res["status"]);
 			push!(surplus, res["surplus"]);
@@ -487,7 +497,7 @@ end
 Tlimit = 10;  # We put a limit on the number of hours to run as it is intensive
 
 # ╔═╡ ea459abd-398c-4bec-9540-e093993ee04f
-case2 = clear_market_loop(data, tax=17.0, case=2, T=Tlimit);
+case2 = clear_market_loop(data, tax=17.0, case=2, T=Tlimit,default=0.8);
 
 # ╔═╡ 945fe315-41a5-4324-a9c6-c6a735cfe44d
 md"""
@@ -577,10 +587,10 @@ We can compare emissions in California between case2 and case3.
 """
 
 # ╔═╡ 13f6a927-58e2-4f23-8d2e-3639a0b74170
-sum([case2["totale_ca_instate"][t] for t=1:size(case2["w"],1)])
+sum([case2["totale_ca_claimed"][t] for t=1:size(case2["w"],1)])
 
 # ╔═╡ 98f838ee-efa6-4951-930a-c60d37e4bc40
-sum([case3["totale_ca_instate"][t] for t=1:size(case3["w"],1)])
+sum([case3["totale_ca_claimed"][t] for t=1:size(case3["w"],1)])
 
 # ╔═╡ 2cd5326b-14a8-4061-8bbe-99b8963b90f9
 md""" 
@@ -593,13 +603,19 @@ We can analyze the impact of default policies into the outcome, which is absent 
 case4 = clear_market_loop(data, tax=17.0, case=4, T=Tlimit);
 
 # ╔═╡ ce28e4c5-8d7a-4939-a02a-bef82da33a81
-sum([case4["totale_ca_instate"][t] for t=1:size(case4["w"],1)])
+sum([case4["totale_ca_claimed"][t] for t=1:size(case4["w"],1)])
 
 # ╔═╡ 7e7b56c4-817e-4136-b699-0f1971f35c64
 case5 = clear_market_loop(data, tax=17.0, case=5, T=Tlimit);
 
 # ╔═╡ 0349e1aa-cef0-4d70-8941-af9f889922b8
 sum([case5["totale_ca_instate"][t] for t=1:size(case5["w"],1)])
+
+# ╔═╡ 7038b9d6-c45d-444e-a16a-1f5de8c88244
+sum(sum([case4["totale"][t] for t=1:size(case5["w"],1)]))
+
+# ╔═╡ fbc385b7-6bcb-419c-8226-a27f2bf4f288
+sum(sum([case2["totale"][t] for t=1:size(case5["w"],1)]))
 
 # ╔═╡ c0bdd314-fc3b-403d-a0bd-1ba914860a83
 md"""
@@ -610,7 +626,7 @@ md"""
 
 2. Try different default rates for case 5. You will notice that emissions start declining as default rates start increasing, replicating the main figure in the paper. 
 
-3. What are the tensions between balancing leakage and efficiency? Try to show a more comprehensive measure of welfare than what our social planner is using (which only accounts for taxed emissions).
+3 (*). What are the tensions between balancing leakage and efficiency? Try to show a more comprehensive measure of welfare than what our social planner is using (which only accounts for taxed emissions).
 
 """
 
@@ -1829,18 +1845,21 @@ version = "0.9.1+5"
 # ╠═1a656c1c-6b54-47c1-8764-06990f4b651b
 # ╠═c90d4fc7-fe8c-4883-b2de-745d2e784c12
 # ╠═ed135e4f-d14c-4cc6-9a64-7f47a9ecd7cb
-# ╠═ad558751-c71b-4baa-aaa6-7e5e326189f9
-# ╟─b529458f-0ed8-421c-99e2-0f2a1480cc1c
-# ╠═fab9ea6e-2b17-44c1-9b8a-443c2c249ad1
+# ╠═a8a98037-00e4-40b5-8997-3914f6d5c260
+# ╠═58d25869-b56f-4881-929e-0016bcf38c94
+# ╟─8419e538-e7a0-4e26-88e4-d00227918c1a
+# ╠═6635ab62-9743-448b-abc7-c77391a83c9f
 # ╟─5573dd3e-8a67-459c-84f6-06671d35a682
 # ╟─75c278e2-a8c8-4d21-b79e-555604febfbf
 # ╟─6049b514-2227-4b24-89f4-b2e01fe9db09
-# ╟─8af6aa91-c10b-45a8-a9c5-b41e500e1eca
-# ╠═e05fb9ab-1550-4a8f-8403-b8732aca0bc8
-# ╠═c1ea130d-748d-490e-9fa7-6f55480249e3
+# ╟─6ae6b398-c170-4404-9b74-1f3c3237fe66
+# ╠═17599268-10f6-4fc6-bdef-5668a349e7ea
+# ╟─d093b417-2370-43b2-9408-5e12a00c017e
+# ╠═76d2ea17-53eb-4cf1-99d2-2741b00340eb
 # ╟─9c2b7ee6-b218-4409-96e5-d08fe098e221
 # ╠═905c4477-10a0-4479-8ff5-8cfadb69c23f
 # ╠═11da5515-5f09-4d7f-9450-e6145b4ca585
+# ╠═d00b6d49-846c-4885-94a8-5259e0ce847b
 # ╟─4c738b38-8269-4cba-a321-64881f41c185
 # ╠═024510e3-b1b6-449b-9a31-93f72449ebe1
 # ╠═1c6cd2b3-8895-418f-aff4-49c67bce0af6
@@ -1861,6 +1880,8 @@ version = "0.9.1+5"
 # ╠═ce28e4c5-8d7a-4939-a02a-bef82da33a81
 # ╠═7e7b56c4-817e-4136-b699-0f1971f35c64
 # ╠═0349e1aa-cef0-4d70-8941-af9f889922b8
+# ╠═7038b9d6-c45d-444e-a16a-1f5de8c88244
+# ╠═fbc385b7-6bcb-419c-8226-a27f2bf4f288
 # ╟─c0bdd314-fc3b-403d-a0bd-1ba914860a83
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

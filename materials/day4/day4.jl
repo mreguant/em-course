@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.19.5
 
 using Markdown
 using InteractiveUtils
@@ -13,6 +13,8 @@ begin
 	using StatsPlots
 	using RCall
 	using Binscatters
+	using StatsBase
+	using FixedEffectModels
 end
 
 
@@ -38,11 +40,14 @@ md"""
 
 """
 
+# ╔═╡ 138e2c43-fdbe-439a-96df-ffcbecbac436
+
+
 # ╔═╡ 9f7987e5-473f-4495-b34b-2af65d42765d
 md"""
 Loading **data**. 
 
-* data\_rtp.csv: Smart meter data of a small sample of 100 consumers.
+* data\_rtp.csv: Smart meter data of a small sample of 40 consumers.
 
 The data is already merged with several other hourly data that can be either consumer specific (weather) or market specific (solar, wind, prices).
 """
@@ -51,8 +56,15 @@ The data is already merged with several other hourly data that can be either con
 begin
 	mydata = CSV.read("data_rtp.csv", DataFrame)
 	mydata = dropmissing(mydata)
+	mydata[:,:small] .= 0.01
 	first(mydata, 5)
 end
+
+# ╔═╡ ff3f4a48-a100-4645-850c-0376345f9699
+summarystats(mydata.price)
+
+# ╔═╡ 2c66f33a-5abe-4a56-bc87-840a63f7fbd0
+describe(mydata)
 
 # ╔═╡ 37a3544c-84c7-4a89-97b8-4c9b88e0d991
 md"""
@@ -84,7 +96,7 @@ We rescale variables to avoid problems with Lasso, which is also sensitive to sc
 
 # ╔═╡ 72302eae-5f8e-4b7c-b7c9-4d704d888481
 begin
-	# we rescale some variables as lasso can go "bananas"
+	# we rescale some variables as lasso can go "bananas". We do not rescale price and kwh because we will be using the log
 	for v in names(mydata[!,Between(:wind_hat,:cos4tau365)])
 		mu = mean(mydata[!,v]);
 		sigma = std(mydata[!,v]);
@@ -138,13 +150,13 @@ end
 
 # ╔═╡ aa4c30b7-4f0a-4963-84d9-62644a08f5ce
 let
-	# let's look at individual correlations
+	# let's look at temporal correlations
 	dates = unique(mydata.date);
 	corrs = [maximum(mydata[mydata.date.==i,:].price)/
 		minimum(mydata[mydata.date.==i,:].price) for i in dates];
-	#histogram(corrs, title="Individual correlation between consumption and prices")
+	#histogram(corrs, title="Temporal correlation between consumption and prices")
 	scatter(dates, corrs)
-	Plots.savefig("scatter_diffs.pdf");
+	#Plots.savefig("scatter_diffs.pdf");
 end
 
 # ╔═╡ 97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
@@ -153,18 +165,6 @@ md"""
 ## Estimation of elasticities
 
 """
-
-# ╔═╡ 9b614988-37cd-4faf-a56b-40348049cf8c
-md"""
-Define the identifiers and create vector to store estimation results
-"""
-
-# ╔═╡ 6b860839-1473-42b5-8125-35d68e888a6a
-begin
-	sample = unique(mydata.id)
-	beta_Hh=zeros(length(sample))
-	se_Hh=zeros(length(sample))
-end
 
 # ╔═╡ e30f8cf1-091c-4841-917d-bbbe96f3149e
 md"""
@@ -177,10 +177,7 @@ We will be running the regression in R. Julia allows you to call R packages, as 
 
 # ╔═╡ 6909b7c8-6a7b-4721-847e-a436f70fdca9
 begin
-	@rput sample
 	@rput mydata
-	@rput beta_Hh
-	@rput se_Hh
 end
 
 # ╔═╡ cf78ecc1-0d74-4bf8-9740-9abd3602025f
@@ -199,23 +196,31 @@ We run a separate regression per household.
 """
 
 # ╔═╡ 16a8ee1d-3ecf-4a79-8c07-2b0ec9bedbed
+# ╠═╡ show_logs = false
 begin
-	for i in 1:length(sample)
-		@rput i
-		 R"""
-			library(hdm) 
-			library(dplyr)
-			iv.reg = rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
-				log(price+.01) + ", controls, " |
-				wind_hat + ", controls)),
-				data = filter(mydata,id==sample[i]), 
-				select.X = TRUE, select.Z = FALSE)
-			beta1<-iv.reg$coef
-			beta_Hh[i]<-beta1
-		"""
-		@rget beta1
-		beta_Hh[i] <- beta1
-	end
+R"""
+library(hdm) 
+library(dplyr)
+
+sample = unique(mydata$id)
+beta_Hh=rep(0,length(sample))
+se_Hh=rep(0,length(sample))
+
+
+
+for (i in 1:length(sample)){
+        iv.reg = rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
+            log(price+.01) + ", controls, " |
+            wind_hat + ", controls)),
+            data = filter(mydata,id==sample[i]), 
+            select.X = TRUE, select.Z = FALSE)
+        
+        beta_Hh[i]<-iv.reg$coef
+        }
+
+ """       
+ @rget beta_Hh
+
 end
 
 # ╔═╡ 848ddf48-373c-4749-ba9a-22a81eb89302
@@ -224,11 +229,39 @@ We can plot the distribution of our household estimates
 """
 
 # ╔═╡ af4d944e-93a6-4178-a30b-75d2f2b15e0e
+# ╠═╡ show_logs = false
 begin
 	density(beta_Hh,legend = false)
 	plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
 end
 
+
+# ╔═╡ b2aecbb2-f78b-47ad-ade2-5690d70e06ee
+md"""
+`rlassoIV` is partialling out the effect of the controls from the endogenous variable, the outcome variable and the instrument. Second, it then uses the residuals to compute the IV estimator (2SLS). In theory, we could have partially out using OLS. The difference is that the LASSO method first selects the relevant variables in each case (and those could be different). For example, we can check which of the controls is relevant for the outcome variable of the first household in our sample:
+
+"""
+
+# ╔═╡ 284baa34-c473-4de9-acbc-5145ba69ed52
+# ╠═╡ show_logs = false
+begin
+R"""
+library(hdm) 
+library(dplyr)
+
+fmla.y = as.formula(paste0("log(kwh+.01) ~",controls))
+Ylasso = rlasso(fmla.y, data = filter(mydata,id == unique(mydata$id)))
+summary(Ylasso)
+
+"""
+
+end	
+
+# ╔═╡ 782f7c75-197c-4a36-862e-22a36e00178c
+md"""
+Only 5 out of the 22 possible controls are relevant in that case...
+
+"""
 
 # ╔═╡ 377fab34-8ae9-47a1-abde-8f9b9e818bb1
 md"""
@@ -243,79 +276,38 @@ The rest is similar than the previous exercise.
 """
 
 
-# ╔═╡ 5aa1b5f1-e3fe-4469-9de3-466ffa56e2e7
-begin
-	data0=mydata[in([0]).(mydata.rtp), :];
-	data1=mydata[in([1]).(mydata.rtp), :];
-
-	sample0=unique(data0.id);
-	sample1=unique(data1.id);
-
-	betas=DataFrame(estimate=zeros(length(sample)),
-					rtp=[zeros(length(sample0));ones(length(sample1))]);
-end
-
-
-# ╔═╡ d631892c-b718-4d96-9981-7eba36f4a0aa
-begin
-	@rput sample0
-	@rput data0
-	@rput sample1
-	@rput data1
-	@rput betas
-end
-
-
-# ╔═╡ 3502dccc-7863-4fb3-9805-e1cc1fc50916
-md""" 
-
-First, we estimate our model for consumers withour RTP (pay attention to the data use in the regression command)
-
-"""
-
 # ╔═╡ 131f5918-b4d0-49ba-a76b-588be85b262c
 begin
-	for i in 1:length(sample0)
-		@rput i
-	 R"""
+	
+	R"""
 	library(hdm) 
 	library(dplyr)
-		iv.reg =  rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
-		log(price+.01) + ", controls, " |
-		wind_hat + ", controls)), 
-		data = filter(data0,id==sample0[i]), 
-		select.X = TRUE, select.Z = FALSE)
-	beta1<-iv.reg$coef
-	"""	
-		@rget beta1
-		betas[i,1]=beta1
-	end
-end
+	
+	betas<-NULL
 
-# ╔═╡ 543a8984-c1af-49eb-bd82-fb9208c570ae
-md""" 
+for (j in unique(mydata$rtp)){
+  data_rtp = filter(mydata, rtp==j)
+  sample_rtp = unique(data_rtp$id)
+  beta_rtp=rep(0,length(sample_rtp))
+  
+  
+  for (i in 1:length(sample_rtp)){
+    iv.reg = rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
+				log(price+.01) + ", controls, " |
+				wind_hat + ", controls)),
+                      data = filter(data_rtp,id==sample_rtp[i] ), 
+                      select.X = TRUE, select.Z = FALSE)
+    
+    beta_rtp[i]<-iv.reg$coef
+  }
+  betas_j = data.frame(estimate=beta_rtp,rtp=j)
+  betas = rbind(betas,betas_j)
+}  
 
-We do the same for consumers with RTP=1.
 
-"""
+	 """       
+	 @rget betas
 
-# ╔═╡ d60275f1-ebb8-4b75-aaa0-20bc7dc297e5
-begin
-	for i in 1:length(sample1)
-		@rput i
-	 R"""
-	library(hdm) 
-	library(dplyr)
-		iv.reg =  rlassoIV(as.formula(paste0("log(kwh+.01) ~ 
-		log(price+.01) + ", controls, "  |
-		wind_hat + ", controls)),
-		data = filter(data1,id==sample1[i]), 
-		select.X = TRUE, select.Z = FALSE)
-	beta1<-iv.reg$coef
-	"""	
-		@rget beta1
-		betas[(length(sample0)+i),1]=beta1
-	end
 end
 
 # ╔═╡ 7d8da4f9-5f0f-4145-8c92-3c4519dcf533
@@ -326,21 +318,58 @@ Again, we can plot the density of each group of estimates and check whether ther
 """
 
 # ╔═╡ 1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
+# ╠═╡ show_logs = false
 begin
 	@df betas density(:estimate, group = :rtp,legend = :topleft)
 	plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
 end
+
+# ╔═╡ 770542f2-6d22-4b1e-b695-c85bb9bf2f60
+md"""
+Finally, we can compare the LASSO results with an standard fixed effects regression. For that, instead of including the date Fourier transformations, we will directly include time fixed effects:
+"""
+
+# ╔═╡ f498b829-84c0-45f5-8188-9c1d60912764
+# ╠═╡ show_logs = false
+begin
+	betas_fe = zeros(length(unique(mydata.id)))
+
+for i in 1:length(unique(mydata.id))
+
+reg_fe = reg(mydata[mydata.id .== unique(mydata.id)[i], :],
+                        @formula(log(kwh +  1.0/100.0) ~ (log(price + 1/100) ~ wind_hat)
+                                   + fe(hr)*fe(m) + fe(y) + fe(weekend)*fe(hr) 
+                                   + solar_actual + temp + temp2 + mwh_dayaheadiberia
+                                    ))
+
+betas_fe[[i]] = coef(reg_fe)[coefnames(reg_fe) .=="log(price + 1 / 100)"]
+end
+          
+df_beta = DataFrame(betas=[beta_Hh;betas_fe],
+                    model=[repeat(["lasso"], length(unique(mydata.id)));repeat(["FE"], length(unique(mydata.id)))])
+
+
+@df df_beta density(:betas, group = :model,legend = :topleft)
+plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
+                
+
+
+end
+
+# ╔═╡ d47373de-a28e-4328-812e-0a193c6fdba1
+
 
 # ╔═╡ cd229515-3441-4b9c-9dd0-936b49b50003
 md"""
 
 ## Follow-up exercises
 
-1. Include the consumption of non-RTP households as a potential control to the Lasso, as in Burlig et al. (2020). What can be some challenges without a pre-treatment period?
 
-2. Explore your ML method of choice as an alternative method to estimate the elasticities. 
+1. Explore your ML method of choice as an alternative method to estimate the elasticities. 
 
-3. Use the Clustering.jl library we used on day 2 to classify consumers into "typical" profiles. This can be a useful way of reducing the dimensionality of the data. We will do something like this on day 5 as well.
+2(*). Include the consumption of non-RTP households as a potential control to the Lasso, as in Burlig et al. (2020). What can be some challenges without a pre-treatment period?
+
+3(*). Use the Clustering.jl library we used on day 2 to classify consumers into "typical" profiles. This can be a useful way of reducing the dimensionality of the data. We will do something like this on day 5 as well.
 
 
 """
@@ -351,21 +380,25 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 Binscatters = "deae81f5-4416-4700-a781-f7a18782af9b"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FixedEffectModels = "9d5cd8c9-2029-5cab-9928-427838db53e3"
 Missings = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
 [compat]
 Binscatters = "~0.2.1"
 CSV = "~0.8.5"
 DataFrames = "~1.2.2"
+FixedEffectModels = "~1.6.6"
 Missings = "~1.0.1"
 Plots = "~1.21.3"
-PlutoUI = "~0.7.9"
+PlutoUI = "~0.7.39"
 RCall = "~0.13.12"
+StatsBase = "~0.33.10"
 StatsPlots = "~0.14.26"
 """
 
@@ -378,6 +411,12 @@ deps = ["LinearAlgebra"]
 git-tree-sha1 = "485ee0867925449198280d4af84bdb46a2a404d0"
 uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
 version = "1.0.1"
+
+[[AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.1.4"
 
 [[Adapt]]
 deps = ["LinearAlgebra"]
@@ -432,9 +471,9 @@ version = "0.8.5"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
+git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.16.1+0"
+version = "1.16.1+1"
 
 [[CategoricalArrays]]
 deps = ["DataAPI", "Future", "JSON", "Missings", "Printf", "RecipesBase", "Statistics", "StructTypes", "Unicode"]
@@ -610,9 +649,9 @@ version = "0.12.3"
 
 [[FixedEffectModels]]
 deps = ["DataFrames", "FixedEffects", "LinearAlgebra", "Printf", "Reexport", "Statistics", "StatsBase", "StatsFuns", "StatsModels", "Tables", "Vcov"]
-git-tree-sha1 = "a036618f39adeffb39d9be8dd54ba2d073256503"
+git-tree-sha1 = "f6bd6f55724d239abcb833678183da20ff4f2c54"
 uuid = "9d5cd8c9-2029-5cab-9928-427838db53e3"
-version = "1.6.4"
+version = "1.6.6"
 
 [[FixedEffects]]
 deps = ["GroupedArrays", "LinearAlgebra", "Printf", "Requires", "StatsBase"]
@@ -686,9 +725,9 @@ version = "0.21.0+0"
 
 [[Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "7bf67e9a481712b3dbe9cb3dac852dc4b1162e02"
+git-tree-sha1 = "a32d672ac2c967f3deb8a81d828afc739c838a06"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.68.3+0"
+version = "2.68.3+2"
 
 [[Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -715,9 +754,27 @@ version = "0.9.14"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
-git-tree-sha1 = "8a954fed8ac097d5be04921d595f741115c1b2ad"
+git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "2.8.1+0"
+version = "2.8.1+1"
+
+[[Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.4"
+
+[[HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.4"
+
+[[IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "f7be53659ab06ddc986428d3a9dcc95f6fa6705a"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.2"
 
 [[IniFile]]
 deps = ["Test"]
@@ -791,6 +848,12 @@ git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.1+0"
 
+[[LERC_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
+version = "3.0.0+1"
+
 [[LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e5b909bcf985c5e2605737d2ce278ed791b89be6"
@@ -833,9 +896,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "761a393aeccd6aa92ec3515e428c26bf99575b3b"
+git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+0"
+version = "3.2.2+1"
 
 [[Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
@@ -868,10 +931,10 @@ uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
 version = "2.35.0+0"
 
 [[Libtiff_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "340e257aada13f95f98ee352d316c3bed37c8ab9"
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "c9551dd26e31ab17b86cbd00c2ede019c08758eb"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.3.0+0"
+version = "4.3.0+1"
 
 [[Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -968,9 +1031,9 @@ version = "1.10.6"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "7937eda4681660b4d6aeeecc2f7e1c81c8ee4e2f"
+git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
-version = "1.3.5+0"
+version = "1.3.5+1"
 
 [[OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -1046,10 +1109,10 @@ uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 version = "1.21.3"
 
 [[PlutoUI]]
-deps = ["Base64", "Dates", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "Suppressor"]
-git-tree-sha1 = "44e225d5837e2a2345e69a1d1e01ac2443ff9fcb"
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
+git-tree-sha1 = "8d1f54886b9037091edf146b517989fc4a09efec"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.9"
+version = "0.7.39"
 
 [[PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -1075,9 +1138,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
-git-tree-sha1 = "ad368663a5e20dbb8d6dc2fddeefe4dae0781ae8"
+git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
 uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
-version = "5.15.3+0"
+version = "5.15.3+1"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -1246,11 +1309,6 @@ version = "1.7.3"
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
-[[Suppressor]]
-git-tree-sha1 = "a819d77f31f83e5792a76081eee1ea6342ab8787"
-uuid = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
-version = "0.2.0"
-
 [[TOML]]
 deps = ["Dates"]
 uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
@@ -1280,6 +1338,11 @@ uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[Tricks]]
+git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.6"
 
 [[URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
@@ -1502,9 +1565,9 @@ version = "1.6.38+0"
 
 [[libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "c45f4e40e7aafe9d086379e5578947ec8b95a8fb"
+git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+0"
+version = "1.3.7+1"
 
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1538,8 +1601,11 @@ version = "0.9.1+5"
 # ╟─21c55f30-0ff5-11ec-331c-ed2069e9f6b2
 # ╠═bd00cdc6-37c0-48ec-a19b-00ce7c8df520
 # ╟─108c7e76-ed2e-4742-85ae-f522aa9d74e5
+# ╠═138e2c43-fdbe-439a-96df-ffcbecbac436
 # ╟─9f7987e5-473f-4495-b34b-2af65d42765d
 # ╠═7293aa95-e8b4-4b38-8987-d2364a578c66
+# ╠═ff3f4a48-a100-4645-850c-0376345f9699
+# ╠═2c66f33a-5abe-4a56-bc87-840a63f7fbd0
 # ╟─37a3544c-84c7-4a89-97b8-4c9b88e0d991
 # ╠═2cd44e61-31ca-471c-b13a-a66aa29472ba
 # ╟─796bb3d9-2fc5-4335-ae81-5b8e8ce0711c
@@ -1551,8 +1617,6 @@ version = "0.9.1+5"
 # ╠═cfbad02e-a889-41d9-93a9-224c8f2d492c
 # ╠═aa4c30b7-4f0a-4963-84d9-62644a08f5ce
 # ╟─97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
-# ╟─9b614988-37cd-4faf-a56b-40348049cf8c
-# ╠═6b860839-1473-42b5-8125-35d68e888a6a
 # ╟─e30f8cf1-091c-4841-917d-bbbe96f3149e
 # ╠═6909b7c8-6a7b-4721-847e-a436f70fdca9
 # ╠═cf78ecc1-0d74-4bf8-9740-9abd3602025f
@@ -1560,15 +1624,16 @@ version = "0.9.1+5"
 # ╠═16a8ee1d-3ecf-4a79-8c07-2b0ec9bedbed
 # ╟─848ddf48-373c-4749-ba9a-22a81eb89302
 # ╠═af4d944e-93a6-4178-a30b-75d2f2b15e0e
+# ╟─b2aecbb2-f78b-47ad-ade2-5690d70e06ee
+# ╠═284baa34-c473-4de9-acbc-5145ba69ed52
+# ╟─782f7c75-197c-4a36-862e-22a36e00178c
 # ╟─377fab34-8ae9-47a1-abde-8f9b9e818bb1
-# ╠═5aa1b5f1-e3fe-4469-9de3-466ffa56e2e7
-# ╠═d631892c-b718-4d96-9981-7eba36f4a0aa
-# ╟─3502dccc-7863-4fb3-9805-e1cc1fc50916
 # ╠═131f5918-b4d0-49ba-a76b-588be85b262c
-# ╟─543a8984-c1af-49eb-bd82-fb9208c570ae
-# ╠═d60275f1-ebb8-4b75-aaa0-20bc7dc297e5
 # ╟─7d8da4f9-5f0f-4145-8c92-3c4519dcf533
 # ╠═1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
-# ╟─cd229515-3441-4b9c-9dd0-936b49b50003
+# ╟─770542f2-6d22-4b1e-b695-c85bb9bf2f60
+# ╠═f498b829-84c0-45f5-8188-9c1d60912764
+# ╠═d47373de-a28e-4328-812e-0a193c6fdba1
+# ╠═cd229515-3441-4b9c-9dd0-936b49b50003
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -33,6 +33,10 @@ The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (202
 
 * Christensen, P., Francisco, P., Myers, E., & Souza, M. (2021). Decomposing the Wedge between Projected and Realized Returns in Energy Efficiency Programs. The Review of Economics and Statistics, 1–46. [https://doi.org/10.1162/rest_a_01087](https://doi.org/10.1162/rest_a_01087)
 
+* Fowlie, M., Wolfram, C.,  Baylis, P., Spurlock, C. A., Todd, A., and Cappers, P. (2021). Default Effects and Follow-on Behavior: Evidence from an Electricity Pricing Program. Review of Economic Studies. [Direct link](https://static1.squarespace.com/static/595af9e472af65691b788c27/t/6275c2a43a19876ad9a57c77/1651884712566/SMUD.pdf) 
+
+* Fowlie, M., Greenstone, M., Wolfram, C. (2018). Do Energy Efficiency Investments Deliver? Evidence from the Weatherization Assistance Program, The Quarterly Journal of Economics, Volume 133, Issue 3. [https://doi.org/10.1093/qje/qjy005](https://doi.org/10.1093/qje/qjy005)
+
 * Jessoe, K., & Rapson, D. (2014). Knowledge is (Less) power: Experimental evidence from residential energy use. American Economic Review. [https://doi.org/10.1257/aer.104.4.1417](https://doi.org/10.1257/aer.104.4.1417)
 
 * Jessoe, K., & Rapson, D. (2015). Commercial and Industrial Demand Response Under Mandatory Time-of-Use Electricity Pricing. Journal of Industrial Economics, 63(3), 397–421. [https://doi.org/10.1111/joie.12082](https://doi.org/10.1111/joie.12082)

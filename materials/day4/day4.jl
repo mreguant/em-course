@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.5
+# v0.19.6
 
 using Markdown
 using InteractiveUtils
@@ -40,9 +40,6 @@ md"""
 
 """
 
-# ╔═╡ 138e2c43-fdbe-439a-96df-ffcbecbac436
-
-
 # ╔═╡ 9f7987e5-473f-4495-b34b-2af65d42765d
 md"""
 Loading **data**. 
@@ -56,7 +53,6 @@ The data is already merged with several other hourly data that can be either con
 begin
 	mydata = CSV.read("data_rtp.csv", DataFrame)
 	mydata = dropmissing(mydata)
-	mydata[:,:small] .= 0.01
 	first(mydata, 5)
 end
 
@@ -69,7 +65,7 @@ describe(mydata)
 # ╔═╡ 37a3544c-84c7-4a89-97b8-4c9b88e0d991
 md"""
 
-We create some Fourier transforms of time.
+We create some Fourier transforms of time in order to capture temporal frequencies at daily, weekly and yearly levels due to seasonality.
 
 """
 
@@ -86,6 +82,9 @@ begin
 	select!(mydata,Not(:t));
 	first(mydata, 5)
 end
+
+# ╔═╡ b32a9a25-04ad-4ced-9176-d9365965bd5c
+binscatter(mydata,@formula(cos1tau1~hr))
 
 # ╔═╡ 796bb3d9-2fc5-4335-ae81-5b8e8ce0711c
 md"""
@@ -156,8 +155,11 @@ let
 		minimum(mydata[mydata.date.==i,:].price) for i in dates];
 	#histogram(corrs, title="Temporal correlation between consumption and prices")
 	scatter(dates, corrs)
-	#Plots.savefig("scatter_diffs.pdf");
+#	Plots.savefig("scatter_diffs.pdf");
 end
+
+# ╔═╡ d76a9ac6-3d1b-4ed8-a280-77164a952407
+length(unique(mydata.date))
 
 # ╔═╡ 97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 md"""
@@ -249,8 +251,8 @@ R"""
 library(hdm) 
 library(dplyr)
 
-fmla.y = as.formula(paste0("log(kwh+.01) ~",controls))
-Ylasso = rlasso(fmla.y, data = filter(mydata,id == unique(mydata$id)))
+fmla.y = as.formula(paste0("log(price+.01) ~",controls))
+Ylasso = rlasso(fmla.y, data = filter(mydata,id == unique(mydata$id)[1]))
 summary(Ylasso)
 
 """
@@ -355,9 +357,6 @@ plot!(xlab="elasticity",ylab="density of the estimates",xlim=(-5,5))
 
 
 end
-
-# ╔═╡ d47373de-a28e-4328-812e-0a193c6fdba1
-
 
 # ╔═╡ cd229515-3441-4b9c-9dd0-936b49b50003
 md"""
@@ -1601,13 +1600,13 @@ version = "0.9.1+5"
 # ╟─21c55f30-0ff5-11ec-331c-ed2069e9f6b2
 # ╠═bd00cdc6-37c0-48ec-a19b-00ce7c8df520
 # ╟─108c7e76-ed2e-4742-85ae-f522aa9d74e5
-# ╠═138e2c43-fdbe-439a-96df-ffcbecbac436
 # ╟─9f7987e5-473f-4495-b34b-2af65d42765d
 # ╠═7293aa95-e8b4-4b38-8987-d2364a578c66
 # ╠═ff3f4a48-a100-4645-850c-0376345f9699
 # ╠═2c66f33a-5abe-4a56-bc87-840a63f7fbd0
 # ╟─37a3544c-84c7-4a89-97b8-4c9b88e0d991
 # ╠═2cd44e61-31ca-471c-b13a-a66aa29472ba
+# ╠═b32a9a25-04ad-4ced-9176-d9365965bd5c
 # ╟─796bb3d9-2fc5-4335-ae81-5b8e8ce0711c
 # ╠═72302eae-5f8e-4b7c-b7c9-4d704d888481
 # ╟─49f22be1-056b-4828-aa8f-57073cc0d2a9
@@ -1616,6 +1615,7 @@ version = "0.9.1+5"
 # ╠═9b626bbf-e10d-4f47-9a0c-5a968b8932e7
 # ╠═cfbad02e-a889-41d9-93a9-224c8f2d492c
 # ╠═aa4c30b7-4f0a-4963-84d9-62644a08f5ce
+# ╠═d76a9ac6-3d1b-4ed8-a280-77164a952407
 # ╟─97d4fa1f-28ff-4ab2-8a3d-74fd677a2664
 # ╟─e30f8cf1-091c-4841-917d-bbbe96f3149e
 # ╠═6909b7c8-6a7b-4721-847e-a436f70fdca9
@@ -1633,7 +1633,6 @@ version = "0.9.1+5"
 # ╠═1f229206-ce0f-4b5b-8fe4-fb6f948ecaf7
 # ╟─770542f2-6d22-4b1e-b695-c85bb9bf2f60
 # ╠═f498b829-84c0-45f5-8188-9c1d60912764
-# ╠═d47373de-a28e-4328-812e-0a193c6fdba1
-# ╠═cd229515-3441-4b9c-9dd0-936b49b50003
+# ╟─cd229515-3441-4b9c-9dd0-936b49b50003
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

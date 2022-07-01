@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.1
+# v0.19.6
 
 using Markdown
 using InteractiveUtils
@@ -56,7 +56,7 @@ md"""
 
 # ╔═╡ e8bbf3d6-425e-475c-8d68-73b4a3f82dd8
 let
-	df_plt1 = combine(groupby(df, :inck), :loose => mean)
+	df_plt1 = combine(groupby(df, :inck), :loose => mean )
 	@df df_plt1 plot(:inck, :loose_mean, label="Truth", legend=:topleft)
 	
 	# we assume all households have the same income distribution as the zip code
@@ -72,7 +72,7 @@ md"""
 
 ## Pretending we don't know! (we really don't)
 
-Now the fun part. We will assume our data does not have data income `inck` and using a naïve approach, the best we can get is the red line in the graph above...
+Now the fun part. We will assume our data does not have data income and using a naïve approach, the best we can get is the red line in the graph above...
 
 """
 
@@ -100,24 +100,42 @@ begin
 	R = kmeans(Xs, 5, maxiter=500, tol=1e-8);
 end
 
-# ╔═╡ 50a16323-bf77-4bc3-a17d-3e5512439866
-md""" 
+# ╔═╡ 07d8d8ee-85e0-4e50-b545-6657749a8a74
+begin
+	df.type = assignments(R); #to check which type is each Hh
+	df_type = combine(groupby(df,:type), #to check consumption profile of each type
+				propertynames(df[:,Between(:s_1_mean0,:s_24_mean0)]) .=> mean);
 
-We can plot the profiles picked up by k-means.
+end
+
+# ╔═╡ f9388ec8-da65-428d-a032-48d4ac8e7b26
+md"""
+We can plot the consumption patterns of the different types.
+"""
+
+# ╔═╡ 5dab02af-482e-42f0-801b-e3534d704a81
+begin
+	#To plot the data we need to reshape it from wide to long. In Julia is done with stack:
+	df_typelong = stack(df_type,Between(:s_1_mean0_mean,:s_24_mean0_mean))	
+@df df_typelong plot(:variable,:value,group=:type,legend=:outerright)
+end
+
+# ╔═╡ 71f22b34-0c5b-499b-8479-1f4b5083018b
+md"""
+And compare it to the consumption patterns of the different income groups.
 
 """
 
-# ╔═╡ 15104b9d-5277-4644-91e2-4e64a676e053
-let
-	df.theta_together = assignments(R);
-	df_plt = combine(groupby(df, :theta_together), 
-		propertynames(df[:,Between(:s_1_mean0,:s_24_mean0)]) .=> mean);
+# ╔═╡ df046ef0-2ebb-4ef1-b5d8-a8d32a41e488
+begin
 	
-	to_plot = transpose(Array(df_plt[:,Between(:s_1_mean0_mean,:s_24_mean0_mean)]));
-	plot(1:24,to_plot,legend=false, 
-		title="Representative consumer loads", 
-		xlabel="Hour of the day", ylabel="Market share")
+df_i = combine(groupby(df,:inck), 
+				propertynames(df[:,Between(:s_1_mean0,:s_24_mean0)]) .=> mean);
+
+df_ilong = stack(df_i,Between(:s_1_mean0_mean,:s_24_mean0_mean))	
+@df df_ilong plot(:variable,:value,group=:inck,legend=:outerright)
 end
+
 
 # ╔═╡ 6a8659ad-ce26-408a-b2c1-06efc911e247
 md"""
@@ -183,14 +201,18 @@ Here we will run the algorithm for every group of similar zip codes.
 
 """
 
+# ╔═╡ 49f10410-e675-4363-9702-3a566eb7f313
+propertynames(df[1,Between(:id,:inck)])
+
 # ╔═╡ 1730d0b3-c20b-4b26-b51b-b42e4ce564fc
 begin
 
-	# Number of clusters per group of zip codes
+	# Number of cluster
 	N = 5;
 	
 	# set up some matrix to store results and help
 	df.index = rownumber.(eachrow(df));
+	df[!,"theta"] = zeros(nrow(df));
 	for k=1:5
 		df[!,string("inc_imp",k)] = zeros(nrow(df));
 	end
@@ -198,13 +220,11 @@ begin
 		df[!,string("inc",k)] = (df.inck.==k);
 	end
 
-	# This line will put all zip codes together in the same group
-	#df.zip_group = 0 * df.zip_group
-	
 	# Loop k-means over groups of zip codes
 	for zg in unique(df.zip_group)
 		
 		df_zip = filter(row -> row.zip_group==zg, df);
+		
 		
 		# STEP 1 ####
 		X = transpose(Array(select(df_zip,Between(:kwh,:s_24_mean0))));
@@ -212,22 +232,28 @@ begin
 		# We scale variables to improve kmeans performance
 		Xs = (X.-repeat(mean(X,dims=2),1,nrow(df_zip))) ./
 				repeat(std(X,dims=2),1,nrow(df_zip)); 
-		R = kmeans(Xs, N; tol=1e-8, maxiter=500);
+		R = kmeans(Xs, N, tol=1e-8, maxiter=500);
 		
 		# Store theta assignments
 		df_zip[!,"theta"] = assignments(R);
 		
 		# STEP 2 ####
+
 		# create dummies for types to get type-zip code distribution
 		for n=1:N
 			df_zip[!,string("theta",n)] = (df_zip.theta.==n);
 		end
+		
+		zip_mat = combine(groupby(df_zip, :zip_id), 
+			:inc1 => mean, :inc2 => mean, :inc3 => mean, :inc4 => mean, :inc5 => mean,
+			:theta1 => mean, :theta2 => mean, 
+			:theta3 => mean, :theta4 => mean, :theta5 => mean);
 
 		inc_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:inc1,:inc5)]) .=> mean))[:,2:6];
 		theta_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:theta1,string("theta",N))]) 
-				.=> mean))[:,2:N+1];
+				.=> mean))[:,2:6];
 
 		eta_fit, inc_fit = gmm_zip(inc_dist,theta_dist)
 		
@@ -240,9 +266,6 @@ begin
 	end
 	
 end
-
-# ╔═╡ f683f88e-02b0-485e-910b-143beb3057aa
-unique(df.zip_id)
 
 # ╔═╡ f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 md"""
@@ -266,8 +289,6 @@ let
 	# we assume all households have the same income distribution as the zip code
 	# equivalent to assuming all households have the same losing rate
 	new_fit = [mean(df.loose, weights(df[!,string("inc_imp",k)])) for k=1:5]
-	# replicates truth again
-	# new_fit = [mean(df.loose, weights((df[!,"inck"].==k))) for k=1:5]
 	plot!(new_fit, label="K-means approach")
 
 end
@@ -404,9 +425,9 @@ version = "0.9.1"
 
 [[Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "f2202b55d816427cd385a9a4f3ffb226bee80f99"
+git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.16.1+0"
+version = "1.16.1+1"
 
 [[Calculus]]
 deps = ["LinearAlgebra"]
@@ -724,9 +745,9 @@ version = "0.21.0+0"
 
 [[Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "7bf67e9a481712b3dbe9cb3dac852dc4b1162e02"
+git-tree-sha1 = "a32d672ac2c967f3deb8a81d828afc739c838a06"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.68.3+0"
+version = "2.68.3+2"
 
 [[Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -753,9 +774,9 @@ version = "0.9.14"
 
 [[HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg"]
-git-tree-sha1 = "8a954fed8ac097d5be04921d595f741115c1b2ad"
+git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
-version = "2.8.1+0"
+version = "2.8.1+1"
 
 [[IniFile]]
 deps = ["Test"]
@@ -853,6 +874,12 @@ git-tree-sha1 = "f6250b16881adf048549549fba48b1161acdac8c"
 uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.1+0"
 
+[[LERC_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
+version = "3.0.0+1"
+
 [[LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e5b909bcf985c5e2605737d2ce278ed791b89be6"
@@ -895,9 +922,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "761a393aeccd6aa92ec3515e428c26bf99575b3b"
+git-tree-sha1 = "0b4a5d71f3e5200a7dff793393e09dfc2d874290"
 uuid = "e9f186c6-92d2-5b65-8a66-fee21dc1b490"
-version = "3.2.2+0"
+version = "3.2.2+1"
 
 [[Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll", "Pkg"]
@@ -930,10 +957,10 @@ uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
 version = "2.35.0+0"
 
 [[Libtiff_jll]]
-deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "340e257aada13f95f98ee352d316c3bed37c8ab9"
+deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "c9551dd26e31ab17b86cbd00c2ede019c08758eb"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.3.0+0"
+version = "4.3.0+1"
 
 [[Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1060,9 +1087,9 @@ version = "1.10.6"
 
 [[Ogg_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "7937eda4681660b4d6aeeecc2f7e1c81c8ee4e2f"
+git-tree-sha1 = "887579a3eb005446d514ab7aeac5d1d027658b8f"
 uuid = "e7412a2a-1a6e-54c0-be00-318e2571c051"
-version = "1.3.5+0"
+version = "1.3.5+1"
 
 [[OpenBLAS32_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1173,9 +1200,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
-git-tree-sha1 = "ad368663a5e20dbb8d6dc2fddeefe4dae0781ae8"
+git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
 uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
-version = "5.15.3+0"
+version = "5.15.3+1"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -1584,9 +1611,9 @@ version = "1.6.38+0"
 
 [[libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "c45f4e40e7aafe9d086379e5578947ec8b95a8fb"
+git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+0"
+version = "1.3.7+1"
 
 [[nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1623,16 +1650,19 @@ version = "0.9.1+5"
 # ╟─119edcfd-3033-48d4-bf82-a037a1a62443
 # ╠═b334db5a-4461-493a-b7fd-336b5c9c0ec4
 # ╠═e8bbf3d6-425e-475c-8d68-73b4a3f82dd8
-# ╟─a6f0afa5-9917-46d4-99e5-9904379db2f3
+# ╠═a6f0afa5-9917-46d4-99e5-9904379db2f3
 # ╟─3508ae1c-1892-4e8d-be4a-930d9fc254a5
 # ╠═086e3bb4-b152-4aa1-b0e3-ecb4dfdb91b8
-# ╟─50a16323-bf77-4bc3-a17d-3e5512439866
-# ╠═15104b9d-5277-4644-91e2-4e64a676e053
-# ╟─6a8659ad-ce26-408a-b2c1-06efc911e247
+# ╠═07d8d8ee-85e0-4e50-b545-6657749a8a74
+# ╠═f9388ec8-da65-428d-a032-48d4ac8e7b26
+# ╠═5dab02af-482e-42f0-801b-e3534d704a81
+# ╟─71f22b34-0c5b-499b-8479-1f4b5083018b
+# ╠═df046ef0-2ebb-4ef1-b5d8-a8d32a41e488
+# ╠═6a8659ad-ce26-408a-b2c1-06efc911e247
 # ╠═b143dd68-24df-44a0-bf0e-e258be9df540
 # ╟─a9ce1df9-fe66-4eed-bacb-064acfe03871
+# ╠═49f10410-e675-4363-9702-3a566eb7f313
 # ╠═1730d0b3-c20b-4b26-b51b-b42e4ce564fc
-# ╠═f683f88e-02b0-485e-910b-143beb3057aa
 # ╟─f94e3bb7-166b-4d8d-b231-5fbb01683fd7
 # ╠═66e07ec1-1017-4306-9e5d-ce653b535455
 # ╠═122b04a2-d77e-43a3-8542-65b5b1e70964

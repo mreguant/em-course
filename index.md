@@ -5,19 +5,6 @@ The goal of the course is threefold:
 * Get familiar with how to use data and models of electricity markets. 
 * Get familiar with how machine learning tools can help with the above.
 
-\newcommand{\figenv}[3]{
-~~~
-<figure style="text-align:center;">
-<img src="!#2" style="padding:0;#3" alt="#1"/>
-<figcaption>#1</figcaption>
-</figure>
-~~~
-}
-With the support of:
-
-\figenv{}{nsf_logo.jpeg}{width:25%}
-\figenv{}{logo_bgse_erc.png}{width:50%}
-
 <!-- \tableofcontents you can use \toc as well -->
 
 ## Preliminaries
@@ -55,3 +42,10 @@ In each **day page** you will find the necessary material:
 * PowerSystems.jl and other libraries - Julia libraries to build electricity models, developed at NREL [https://www.nrel.gov/analysis/siip.html](https://www.nrel.gov/analysis/siip.html)
 
 * A tutorial to learn JuMP (also referenced above) - [https://github.com/jump-dev/JuMPTutorials.jl](https://github.com/jump-dev/JuMPTutorials.jl)
+
+##
+
+With the support of:
+
+\fig{./nsf_logo.jpeg}
+\fig{./LOGO_ERC-FLAG_EU_.jpeg}

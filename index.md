@@ -5,6 +5,19 @@ The goal of the course is threefold:
 * Get familiar with how to use data and models of electricity markets. 
 * Get familiar with how machine learning tools can help with the above.
 
+\newcommand{\figenv}[3]{
+~~~
+<figure style="text-align:center;">
+<img src="!#2" style="padding:0;#3" alt="#1"/>
+<figcaption>#1</figcaption>
+</figure>
+~~~
+}
+With the support of:
+
+\figenv{}{nsf_logo.jpeg}{width:25%}
+\figenv{}{logo_bgse_erc.png}{width:50%}
+
 <!-- \tableofcontents you can use \toc as well -->
 
 ## Preliminaries

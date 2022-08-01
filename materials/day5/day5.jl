@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.6
+# v0.17.5
 
 using Markdown
 using InteractiveUtils
@@ -243,17 +243,12 @@ begin
 		for n=1:N
 			df_zip[!,string("theta",n)] = (df_zip.theta.==n);
 		end
-		
-		zip_mat = combine(groupby(df_zip, :zip_id), 
-			:inc1 => mean, :inc2 => mean, :inc3 => mean, :inc4 => mean, :inc5 => mean,
-			:theta1 => mean, :theta2 => mean, 
-			:theta3 => mean, :theta4 => mean, :theta5 => mean);
 
 		inc_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:inc1,:inc5)]) .=> mean))[:,2:6];
 		theta_dist = Array(combine(groupby(df_zip, :zip_id), 
 				propertynames(df_zip[:,Between(:theta1,string("theta",N))]) 
-				.=> mean))[:,2:6];
+				.=> mean))[:,2:N+1];
 
 		eta_fit, inc_fit = gmm_zip(inc_dist,theta_dist)
 		

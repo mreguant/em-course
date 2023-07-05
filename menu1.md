@@ -23,7 +23,7 @@ The exercise will be based on the paper by Petersen, Reguant, and Segura (2021).
 * **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.jl) and the data CSV file in the same folder. Then, open the exercise Julia file from Pluto to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the exercise Julia file (.jl) and the data CSV file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings
 

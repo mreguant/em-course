@@ -9,15 +9,13 @@ The goal of the course is threefold:
 
 ## Preliminaries
 
-We will be using Julia and Pluto.jl to run the exercises. For this, **you will need to install Julia in your computer, and add the Pluto package to Julia.** 
+We will be using [Julia](https://julialang.org/) and [Jupyter Notebooks](https://jupyter.org/) to run the exercises. For this, **you will need to install Julia in your computer, and Jupyter Notebooks.** 
 
-You can follow this amazing guide form MIT to get started into installing this in your computer: [How to install Julia and Pluto.jl](https://computationalthinking.mit.edu/Spring21/installation/)
+You can follow this guide to [add Julia to Jupyter Notebooks](https://datatofish.com/add-julia-to-jupyter/).
 
-> Credit goes to [Florian Oswald](https://floswald.github.io) for learning about these resources. Check his website for amazing computational tools with Julia.
+:exclamation: It is **highly recommended** to make sure you can use Julia and Jupyter Notebooks before class starts. We will also spend time the first day to get this going.
 
-:exclamation: It is **highly recommended** to make sure you can use Julia and Pluto before class starts.
-
-:information_source: You can **test the installation** by checking this small workbook plotting installed wind capacity in a few select countries. Download the [exercise file](/materials/day0/day0.jl) and [data file](/materials/day0/cumulative-installed-wind-energy-capacity-gigawatts.csv) in the same folder, and open the exercise file from Pluto to get started.
+:information_source: You can **test the installation** by checking this small workbook plotting installed wind capacity in a few select countries. Download the [exercise file](/materials/day0/day0.ipynb) and [data file](/materials/day0/cumulative-installed-wind-energy-capacity-gigawatts.csv) in the same folder, and open the exercise file in Jupyter Notebooks to get started.
 
 ## Further optional prep
 
@@ -37,7 +35,7 @@ In each **day page** you will find the necessary material:
 
 * Quantitative Economics with Julia (macro focus) [https://julia.quantecon.org](https://julia.quantecon.org)
 
-* MIT Introduction to Computational Thinking (with Pluto live notebooks) [https://computationalthinking.mit.edu/Spring21/](https://computationalthinking.mit.edu/Spring21/)
+* MIT Introduction to Computational Thinking [https://computationalthinking.mit.edu/Spring21/](https://computationalthinking.mit.edu/Spring21/)
 
 * PowerSystems.jl and other libraries - Julia libraries to build electricity models, developed at NREL [https://www.nrel.gov/analysis/siip.html](https://www.nrel.gov/analysis/siip.html)
 

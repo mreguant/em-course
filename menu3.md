@@ -25,7 +25,7 @@ A repository of the conference paper can be found [here](https://www.openicpsr.o
 * **Data file**: [data_leakage.zip](/materials/day3/data_leakage.zip)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file and the data zip file in the same folder. You need to unzip de data\_leakage folder. It should appear as a subfolder with the same name, "data\_leakage". It contains several .csv files. Then, open the exercise Julia file from Pluto to start exploring. 
+> :exclamation: Save the exercise Julia file (.ipynb) and the data zip file in the same folder. You need to unzip de data\_leakage folder. It should appear as a subfolder with the same name, "data\_leakage". It contains several .csv files. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. 
 Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings

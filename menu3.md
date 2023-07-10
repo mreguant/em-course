@@ -16,11 +16,9 @@ In the practical session, we will continue to learn how to use JuMP to build ele
 
 ## Practical exercise: Supply climate policies and leakage
 
-The exercise will be based on the paper by [Fowlie, Petersen, and Reguant (2021)](/materials/day3/pandp.20211073.pdf). Reading the paper in advance is encouraged.
+The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
 
-A repository of the conference paper can be found [here](https://www.openicpsr.org/openicpsr/project/131024/version/V1/view). The [online appendix](https://www.aeaweb.org/content/file?id=14554) is particularly helpful, given how short the paper is.
-
-* **Exercise file**: [day3.jl](/materials/day3/day3.jl) / [day3_julia.pdf](/materials/day3/day3_julia.pdf)
+* **Exercise file**: [day3.ipynb](/materials/day3/day3.ipynb) / [day3_julia.pdf](/materials/day3/day3_julia.pdf)
 
 * **Data file**: [data_leakage.zip](/materials/day3/data_leakage.zip)
 

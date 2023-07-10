@@ -16,9 +16,9 @@ In the practical session, we will learn how to use machine learning tools to est
 
 ## Practical exercise: Dynamic pricing in retail
 
-The exercise will be based on the paper by Fabra, Rapson, Reguant, and Wang (2021). Reading the paper in advance is encouraged.
+The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day4.jl](/materials/day4/day4.jl) / [day4_julia.pdf](/materials/day4/day4_julia.pdf)
+* **Exercise file**: [day4.ipynb](/materials/day4/day4.ipynb) / [day4_julia.pdf](/materials/day4/day4_julia.pdf)
 
 * **Data file**: [data_rtp.csv](/materials/day4/data_rtp.csv)
 

@@ -18,12 +18,12 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 The exercise will be based on the paper by Petersen, Reguant, and Segura (2021). Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day1.jl](/materials/day1/day1.jl) / [day1_julia.pdf](/materials/day1/day1_julia.pdf)
+* **Exercise file**: [day1.jl](/materials/day1/day1.ipynb) / [day1_julia.pdf](/materials/day1/day1_julia.pdf)
 
 * **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.jl) and the data CSV file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the exercise Julia file (.ipynb) and the data CSV file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings
 

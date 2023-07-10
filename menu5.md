@@ -15,16 +15,10 @@ In the practical session, we will learn how to combine machine learning tools ap
 * **Slides**: [day5.pdf](/materials/day5/day5.pdf), [slides_distributional.pdf](/materials/day5/slides_distributional.pdf)
 
 
-## Practical exercise: Heterogeneous consumers
+## Practical exercise: Project presentations
 
-The exercise will be based on the paper by Wang, Reguant, Fabra, and Cahana (work in progress). Paper not yet available for distribution.
+You will present your own project based on the model that you have learnt.
 
-* **Exercise file**: [day5.jl](/materials/day5/day5.jl) / [day5_julia.pdf](/materials/day5/day5_julia.pdf)
-
-* **Data file**: [data_kmeans.csv.zip](/materials/day5/data_kmeans.csv.zip)
-
-<!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.ipynb) and the data zip file in the same folder. You need to unzip de data\_kmeans.csv file. It is only one compressed .csv file. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
 
 ## References and readings
 

@@ -8,7 +8,7 @@ date = Date(2021, 8, 9)
 
 In the third lecture, we will talk about environmental regulation and how it affects participants in the electricity market. 
 
-In the practical session, we will continue to learn how to use JuMP to build electricity models. We will incorporate transmission lines and environmental regulation into a model with a richer set of plants. We will also practice ways in which to save and loop over several simulations.
+In the practical session, we will continue to learn how to use JuMP to build electricity models. We will incorporate investment and environmental regulation into a model with a richer set of plants. We will also practice ways in which to save and loop over several simulations.
 
 ## Lecture
 
@@ -20,7 +20,7 @@ The exercise will be based on the paper by Reguant (2019), "The Efficiency and S
 
 * **Exercise file**: [day3.ipynb](/materials/day3/day3.ipynb) / [day3_julia.pdf](/materials/day3/day3_julia.pdf)
 
-* **Data file**: [data_leakage.zip](/materials/day3/data_leakage.zip)
+* **Data file**: [data_jaere.csv](/materials/day2/data_jaere_500.csv), [data\_technology\_simple.csv](/materials/day2/data_technology_simple.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file (.ipynb) and the data zip file in the same folder. You need to unzip de data\_leakage folder. It should appear as a subfolder with the same name, "data\_leakage". It contains several .csv files. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. 

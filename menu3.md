@@ -18,8 +18,8 @@ In the practical session, we will continue to learn how to use JuMP to build ele
 
 The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day3.ipynb](/materials/day3/day3.ipynb) / [day3_julia.pdf](/materials/day3/day3_julia.pdf)
-
+* **Exercise file**: [day3.ipynb](/materials/day3/day3.ipynb)
+  
 * **Data file**: [data_jaere.csv](/materials/day2/data_jaere_500.csv), [data\_technology\_simple.csv](/materials/day2/data_technology_simple.csv)
 
 <!-- ## Homework -->

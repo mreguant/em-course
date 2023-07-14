@@ -12,9 +12,10 @@ In the practical session, we will learn how to combine machine learning tools ap
 
 ## Lecture
 
-* **Slides**: [day5.pdf](/materials/day5/day5.pdf), [slides_distributional.pdf](/materials/day5/slides_distributional.pdf)
+* **Slides**: [day5.pdf](/materials/day5/day5.pdf)
 
-
+* **Supplementary slides**: [slides_distributional.pdf](/materials/day5/slides_distributional.pdf),  [schools_bgse.pdf](/materials/day4/schools_bgse.pdf)
+  
 ## Practical exercise: Project presentations
 
 You will present your own project based on the model that you have learnt.

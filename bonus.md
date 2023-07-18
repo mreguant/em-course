@@ -35,11 +35,12 @@ The exercise is based on the baseline model covered in the course, but with a mi
 
 * **Exercise file**: [pset1_solution.ipynb](/materials/bonus/pset1_solution.ipynb)
   
-* **Data file**: [data_jaere_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
+* **Data file**: [data\_jaere\_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
   
 ## Problem set on rooftop solar and net metering (uses complementarity conditions / mixed integer)
 The exercise is based on the baseline model covered in the course, but with a mixed integer formulation. It considers investment decisions by households by reformulating what determines the profitability of solar (zero profit condition). The zero profit condition changes depending on the retribution rules for rooftop solar.
 
 * **Exercise file**: [pset2_solution.ipynb](/materials/bonus/pset2_solution.ipynb)
   
-* **Data file**: [data_jaere_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
+* **Data file**: [data\_jaere\_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
+  

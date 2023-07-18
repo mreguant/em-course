@@ -63,9 +63,9 @@ version = "0.10.88"
 
 [[FranklinTemplates]]
 deps = ["LiveServer"]
-git-tree-sha1 = "be1fc19bec874548ed59cfc272dc6f71a2044dab"
+git-tree-sha1 = "88a91e1b383b8ae435522ebeb3278334c24b06c4"
 uuid = "3a985190-f512-4703-8d38-2a7944ed5916"
-version = "0.9.1"
+version = "0.9.2"
 
 [[HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
@@ -121,10 +121,10 @@ uuid = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 version = "2.14.0"
 
 [[LiveServer]]
-deps = ["HTTP", "MIMEs", "Pkg", "Sockets"]
-git-tree-sha1 = "0092eeb1b8b3536ddfe538bb523218ddd0883ecb"
+deps = ["HTTP", "MIMEs", "Pkg", "Sockets", "Test"]
+git-tree-sha1 = "f47a6149a045fefea1d76f456e8e7caf90c4c81e"
 uuid = "16fef848-5104-11e9-1b77-fb7a48bbb589"
-version = "1.2.2"
+version = "1.2.4"
 
 [[Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"

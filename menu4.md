@@ -20,8 +20,8 @@ In the practical session, we will incorporate demand considerations and retail t
 The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
 
 * **Exercise file**: [day4.ipynb](/materials/day4/day4.ipynb)
-
-* **Data file**: [data_jaere.csv](/materials/day2/data_jaere_500.csv), [data\_technology\_simple.csv](/materials/day2/data_technology_simple.csv)
+  
+* **Data file**: [data_jaere_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the exercise Julia file (.ipynb) and the data zip file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.

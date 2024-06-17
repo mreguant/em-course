@@ -8,17 +8,17 @@ date = Date(2021, 6, 9)
 
 In the first lecture, we will talk about the many changes that are occurring in electricity markets with an emphasis on the expansion of renewables with stronger climate policies and cheaper costs. 
 
-In the practical session, we will get familiar with a dataset of electricity market hourly data, and analyze the impact that wind is having on this market.
+In the practical session, we will get familiar with a dataset of electricity market hourly data, and analyze the impact that wind is having on this market. 
 
 ## Lecture
 
 * **Slides**: [day1.pdf](/materials/day1/day1.pdf)
 
 ## Practical exercise: Wind impacts in Spain
-
+We will start the practicum with a short tutorial on Julia.
 The exercise will be based on the paper by Petersen, Reguant, and Segura (2021). Reading the paper in advance is encouraged.
 
-* **Exercise file**: [day1.jl](/materials/day1/day1.ipynb)
+* **Exercise file**: [julia_tutorial.ipynb](/materials/day1/julia_tutorial.ipynb) [day1.ipynb](/materials/day1/day1.ipynb)
 
 * **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
 

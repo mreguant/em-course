@@ -17,7 +17,7 @@ In the practical session, we will get familiar with a dataset of electricity mar
   
 ## Practical exercises
 
-* **Practicum 3**: [practicum3.ipynb](/materials/day2/practicum3.ipynb), [data_spain.csv](/materials/day1/data_spain.csv)
+* **Practicum 3**: [practicum3.ipynb](/materials/day2/practicum3.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
 * **Practicum 4**: [practicum4.ipynb](/materials/day2/practicum4.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
 
 <!-- ## Homework -->

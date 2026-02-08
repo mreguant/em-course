@@ -17,8 +17,8 @@ In the practical session, we will incorporate demand considerations and retail t
   
 ## Practical exercises
 
-* **Practicum 7**: [practicum7.ipynb](/materials/day4/practicum7.ipynb), XXX
-* **Practicum 8**: [practicum8.ipynb](/materials/day4/practicum8.ipynb),  [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
+* **Practicum 7**: [practicum7.ipynb](/materials/day4/practicum7.ipynb), [data_rtp.csv](/materials/day4/data_rtp.csv),[df_tou.csv](/materials/day4/df_tou.csv)
+* **Practicum 8**: [practicum8.ipynb](/materials/day4/practicum8.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
 
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.

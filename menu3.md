@@ -17,8 +17,8 @@ In the practical session, we will continue to learn how to use JuMP to build ele
   
 ## Practical exercises
 
-* **Practicum 5**: [practicum5.ipynb](/materials/day3/practicum5.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
-* **Practicum 6**: [practicum6.ipynb](/materials/day3/practicum6.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_leakage.zip](/materials/day3/data_leakage.zip)
+* **Practicum 5**: [practicum5.ipynb](/materials/day3/practicum5.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
+* **Practicum 6**: [practicum6.ipynb](/materials/day3/practicum6.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data\_leakage.zip](/materials/day3/data_leakage.zip)
 
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. For Practicum 6, unzip de data_leakage file. Then, open the Jupyter Notebook to start exploring.

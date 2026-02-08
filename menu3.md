@@ -12,20 +12,16 @@ In the practical session, we will continue to learn how to use JuMP to build ele
 
 ## Lecture
 
-* **Slides**: [day3.pdf](/materials/day3/day3.pdf)
-* **Supplementary Slides**: [slides_chile.pdf](/materials/day3/slides_chile.pdf)
-
-## Practical exercise: Supply climate policies and leakage
-
-The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
-
-* **Exercise file**: [day3.ipynb](/materials/day3/day3.ipynb)
+* **Slides 5**: [slides5.pdf](/materials/day3/slides5.pdf)
+* **Slides 6**: [slides6.pdf](/materials/day3/slides6.pdf)
   
-* **Data file**: [data\_jaere\_clustered.csv](/materials/day2/data_jaere_clustered.csv), [data\_technology.csv](/materials/day2/data_technology.csv)
+## Practical exercises
+
+* **Practicum 5**: [practicum5.ipynb](/materials/day3/practicum5.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
+* **Practicum 6**: [practicum6.ipynb](/materials/day3/practicum6.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.ipynb) and the data zip file in the same folder. You need to unzip de data\_leakage folder. It should appear as a subfolder with the same name, "data\_leakage". It contains several .csv files. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. 
-Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.
 
 ## References and readings
 

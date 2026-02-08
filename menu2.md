@@ -12,18 +12,16 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 ## Lecture
 
-* **Slides**: [day2.pdf](/materials/day2/day2.pdf)
+* **Slides 3**: [slides3.pdf](/materials/day2/slides3.pdf)
+* **Slides 4**: [slides4.pdf](/materials/day2/slides4.pdf)
+  
+## Practical exercises
 
-## Practical exercise: A model of the electricity sector
-
-The exercise will be based on the paper by Reguant (2019), "The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies". Reading the paper in advance is encouraged.
-
-* **Exercise file**: [day2.ipynb](/materials/day2/day2.ipynb)
-
-* **Data file**: [data_jaere.csv](/materials/day2/data_jaere.csv), [data\_technology\_simple.csv](/materials/day2/data_technology_simple.csv)
+* **Practicum 3**: [practicum3.ipynb](/materials/day2/practicum3.ipynb), [data_spain.csv](/materials/day1/data_spain.csv)
+* **Practicum 4**: [practicum4.ipynb](/materials/day2/practicum4.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
 
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.ipynb) and the data CSV file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.
 
 ## References and readings
 

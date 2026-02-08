@@ -8,22 +8,20 @@ date = Date(2021, 6, 9)
 
 In the first lecture, we will talk about the many changes that are occurring in electricity markets with an emphasis on the expansion of renewables with stronger climate policies and cheaper costs. 
 
-In the practical session, we will get familiar with a dataset of electricity market hourly data, and analyze the impact that wind is having on this market. 
+In the practical session, we will get familiar with a dataset of electricity market hourly data, and analyze the impact that wind is having on this market. We will also start to explain how electricity markets work in more detail.
 
 ## Lecture
 
-* **Slides**: [day1.pdf](/materials/day1/day1.pdf)
+* **Slides 1**: [slides1.pdf](/materials/day1/slides1.pdf)
+* **Slides 2**: [slides2.pdf](/materials/day1/slides2.pdf)
+  
+## Practical exercises
 
-## Practical exercise: Wind impacts in Spain
-We will start the practicum with a short tutorial on Julia.
-The exercise will be based on the paper by Petersen, Reguant, and Segura (2021). Reading the paper in advance is encouraged.
-
-* **Exercise file**: [julia_tutorial.ipynb](/materials/day1/julia_tutorial.ipynb) [day1.ipynb](/materials/day1/day1.ipynb)
-
-* **Data file**: [data_spain.csv](/materials/day1/data_spain.csv)
-
+* **Practicum 1**: [practicum1.ipynb](/materials/day1/practicum1.ipynb), [data_spain.csv](/materials/day1/data_spain.csv)
+* **Practicum 2**: [practicum2.ipynb](/materials/day1/practicum2.ipynb), [data_jaere.csv](/materials/day1/data_jaere.csv),[data_technology.csv](/materials/day1/data_technology.csv)
+  
 <!-- ## Homework -->
-> :exclamation: Save the exercise Julia file (.ipynb) and the data CSV file in the same folder. Then, open the exercise Julia file from Jupyter Notebooks to start exploring. Note that the .pdf file provides a snapshot of the exercise. It does not require any installation but it will not allow interactions.
+> :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.
 
 ## References and readings
 

@@ -12,11 +12,17 @@ In the practical session, we will learn how to combine machine learning tools ap
 
 ## Lecture
 
-* **Slides**: [day5.pdf](/materials/day5/day5.pdf)
-
-* **Supplementary slides**: [slides_distributional.pdf](/materials/day5/slides_distributional.pdf),  [schools_bgse.pdf](/materials/day4/schools_bgse.pdf)
+* **Slides 9**: [slides9.pdf](/materials/day5/slides9.pdf)
+* **Slides 10**: [slides10.pdf](/materials/day5/slides10.pdf)
   
-## Practical exercise: Project presentations
+## Practical exercises
+
+* **Practicum 9**: [practicum9.ipynb](/materials/day5/practicum9.ipynb), [data_jaere_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv)
+
+<!-- ## Homework -->
+> :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.
+  
+## Project presentations
 
 You will present your own project based on the model that you have learnt.
 

@@ -13,7 +13,6 @@ In the practical session, we will learn how to combine machine learning tools ap
 ## Lecture
 
 * **Slides 9**: [slides9.pdf](/materials/day5/slides9.pdf)
-* **Slides 10**: [slides10.pdf](/materials/day5/slides10.pdf)
   
 ## Practical exercises
 
@@ -24,7 +23,7 @@ In the practical session, we will learn how to combine machine learning tools ap
   
 ## Project presentations
 
-You will present your own project based on the model that you have learnt.
+You will present your own project based on the model that you have learned.
 
 
 ## References and readings

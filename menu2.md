@@ -25,11 +25,11 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 ## References and readings
 
-* Borenstein, Bushnell, and Wolak (2002). Measuring Market Inefficiencies in California's Restructured Wholesale Electricity Market, American Economic Review 92 (5): 1376–1405. [https://www.aeaweb.org/articles?id=10.1257/000282802762024557](https://www.aeaweb.org/articles?id=10.1257/000282802762024557)
+* (*) Borenstein, Bushnell, and Wolak (2002). Measuring Market Inefficiencies in California's Restructured Wholesale Electricity Market, American Economic Review 92 (5): 1376–1405. [https://www.aeaweb.org/articles?id=10.1257/000282802762024557](https://www.aeaweb.org/articles?id=10.1257/000282802762024557)
 
 * Bushnell, J. (2011). Building blocks: Investment in renewable and nonrenewable technologies. In Harnessing Renewable Energy in Electric Power Systems: Theory, Practice, Policy: Vol. WP-202R (pp. 159–180). [https://doi.org/10.4324/9781936331864](https://doi.org/10.4324/9781936331864)
 
-* Bushnell, J., Mansur, E., & Saravia, C. (2008). Vertical Arrangments, Market Structure, and Competition: An Analysis of Restructured US Electricity Markets. American Economic Review, 98(1), 237–266. [https://doi.org/10.1257/aer.98.1.237](https://doi.org/10.1257/aer.98.1.237)
+* (*) Bushnell, J., Mansur, E., & Saravia, C. (2008). Vertical Arrangments, Market Structure, and Competition: An Analysis of Restructured US Electricity Markets. American Economic Review, 98(1), 237–266. [https://doi.org/10.1257/aer.98.1.237](https://doi.org/10.1257/aer.98.1.237)
 
 * Ito, K., & Reguant, M. (2016). Sequential markets, market power, and arbitrage. American Economic Review, 106(7), 1921–1957. [https://doi.org/10.1257/aer.20141529](https://doi.org/10.1257/aer.20141529)
 

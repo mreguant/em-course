@@ -16,7 +16,7 @@ In the practical session, we will learn how to combine machine learning tools ap
   
 ## Practical exercises
 
-* **Practicum 9**: [practicum9.ipynb](/materials/day5/practicum9.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data\_technology.csv](/materials/day1/data_technology.csv)
+* **Practicum 9**: [practicum9.ipynb](/materials/day5/practicum9.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data\_technology.csv](/materials/day1/data_technology.csv), [practicum9_slides.pdf](/materials/day5/practicum9_slides.pdf)
 
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.

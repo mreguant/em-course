@@ -17,8 +17,8 @@ In the practical session, we will get familiar with a dataset of electricity mar
   
 ## Practical exercises
 
-* **Practicum 1**: [practicum1.ipynb](/materials/day1/practicum1.ipynb), [data_spain.csv](/materials/day1/data_spain.csv)
-* **Practicum 2**: [practicum2.ipynb](/materials/day1/practicum2.ipynb), [data\_jaere.csv](/materials/day1/data_jaere.csv)
+* **Practicum 1**: [practicum1.ipynb](/materials/day1/practicum1.ipynb), [data_spain.csv](/materials/day1/data_spain.csv), [practicum1_slides.pdf](/materials/day1/practicum1_slides.pdf)
+* **Practicum 2**: [practicum2.ipynb](/materials/day1/practicum2.ipynb), [data\_jaere.csv](/materials/day1/data_jaere.csv), [practicum2_slides.pdf](/materials/day1/practicum2_slides.pdf)
   
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.

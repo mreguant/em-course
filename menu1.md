@@ -19,6 +19,8 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 * **Practicum 1**: [practicum1.ipynb](/materials/day1/practicum1.ipynb), [data_spain.csv](/materials/day1/data_spain.csv), [practicum1_slides.pdf](/materials/day1/practicum1_slides.pdf)
 * **Practicum 2**: [practicum2.ipynb](/materials/day1/practicum2.ipynb), [data\_jaere.csv](/materials/day1/data_jaere.csv), [practicum2_slides.pdf](/materials/day1/practicum2_slides.pdf)
+
+* **Small assignement**: Take the data from practicum 1 and apply the clustering algorithm from practicum 2. Can you replicate some of the results using a regression in the clustered dataset? Why or why not? _Note_: It is important that you use a weighted regression. 
   
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.

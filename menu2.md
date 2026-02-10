@@ -35,4 +35,6 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 * Kellogg, R., & Reguant, M. (2021). Energy and Environmental Markets, Industrial Organization, and Regulation, in preparation for Handbook of Industrial Organization, [working paper](/materials/day2/Handbook_IO_EEE.pdf)
 
+* Reguant, M. (2014). Complementary Bidding Mechanisms and Startup Costs in Electricity Markets. Review of Economic Studies, 2014, 81(4): 1708-1742.
+
 * Reguant, M. (2019). The Efficiency and Sectoral Distributional Impacts of Large-Scale Renewable Energy Policies. Journal of the Association of Environmental and Resource Economists, 6(S1), S129–S168. [https://doi.org/10.1086/701190](https://doi.org/10.1086/701190)

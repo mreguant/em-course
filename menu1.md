@@ -29,6 +29,8 @@ In the practical session, we will get familiar with a dataset of electricity mar
 
 * Abrell, J., Kosch, M., & Rausch, S. (2019). Carbon abatement with renewables: Evaluating wind and solar subsidies in Germany and Spain. Journal of Public Economics, 169, 172–202. [https://doi.org/10.1016/j.jpubeco.2018.11.007](https://doi.org/10.1016/j.jpubeco.2018.11.007)
 
+* Brown, D. & Reguant, M. (2025). The Price Impacts of Renewable Power: A Tale of Two Sources, R&R at IJIO. [Working paper](https://mreguant.github.io/papers/Brown%20and%20Reguant%20-%202026.pdf)
+
 * Bushnell, J., & Novan, K. (2021). Setting with the Sun: The Impacts of Renewable Energy on Conventional Generation. Journal of the Association of Environmental and Resource Economists, 8(4), 759–796. [https://doi.org/10.1086/713249](https://doi.org/10.1086/713249)
 
 * Cullen, J. (2013). Measuring the environmental benefits of wind-generated electricity. American Economic Journal: Economic Policy, 5(4), 107–133. [https://doi.org/10.1257/pol.5.4.107](https://doi.org/10.1257/pol.5.4.107)

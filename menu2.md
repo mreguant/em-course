@@ -20,6 +20,8 @@ In the practical session, we will get familiar with a dataset of electricity mar
 * **Practicum 3**: [practicum3.ipynb](/materials/day2/practicum3.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv), [practicum1_slides.pdf](/materials/day2/practicum3_slides.pdf)
 * **Practicum 4**: [practicum4.ipynb](/materials/day2/practicum4.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv), [practicum1_slides.pdf](/materials/day2/practicum4_slides.pdf)
 
+* **Small assignement**: Take Practicum 3 code and consider running the market power function for alternative levels of market power (theta). What is the theta that best fits the data? Justify how you define "best fit" in your answer.
+  
 <!-- ## Homework -->
 > :exclamation: Save the Jupyter notebook (.ipynb) and the data CSV file in the same folder. Then, open the Jupyter Notebook to start exploring.
 

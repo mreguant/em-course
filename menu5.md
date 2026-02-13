@@ -13,7 +13,8 @@ In the practical session, we will learn how to combine machine learning tools ap
 ## Lecture
 
 * **Slides 9**: [slides9.pdf](/materials/day5/slides9.pdf)
-  
+* **Slides 10**: [slides9.pdf](/materials/day5/slides10.pdf)
+    
 ## Practical exercises
 
 * **Practicum 9**: [practicum9.ipynb](/materials/day5/practicum9.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data\_technology.csv](/materials/day1/data_technology.csv), [practicum9_slides.pdf](/materials/day5/practicum9_slides.pdf)

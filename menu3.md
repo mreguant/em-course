@@ -17,8 +17,8 @@ In the practical session, we will continue to learn how to use JuMP to build ele
   
 ## Practical exercises
 
-* **Practicum 5**: [practicum5.ipynb](/materials/day3/practicum5.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv), [practicum1_slides.pdf](/materials/day3/practicum5_slides.pdf)
-* **Practicum 6**: [practicum6.ipynb](/materials/day3/practicum6.ipynb), [data\_leakage.zip](/materials/day3/data_leakage.zip), [practicum1_slides.pdf](/materials/day3/practicum6_slides.pdf)
+* **Practicum 5**: [practicum5.ipynb](/materials/day3/practicum5.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data_technology.csv](/materials/day1/data_technology.csv), [practicum5_slides.pdf](/materials/day3/practicum5_slides.pdf)
+* **Practicum 6**: [practicum6.ipynb](/materials/day3/practicum6.ipynb), [data\_leakage.zip](/materials/day3/data_leakage.zip), [practicum6_slides.pdf](/materials/day3/practicum6_slides.pdf)
 
 * **Small assignement**: Take Practicum 5 and consider modeling RPS (renewable portfolio standards). Explain how RPS shifts the costs of renewable vs. non-renewable firms. If the goal is to achieve 30% renewable generation, what is the equilibrium price associated with this policy? 
 _Hint_: Start by incorporating RPS into the costs of technologies, assuming a target of 30%. Then try different permit prices so that, in equilibrium, the target is met. 

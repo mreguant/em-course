@@ -17,7 +17,7 @@ In the practical session, we will incorporate demand considerations and retail t
   
 ## Practical exercises
 
-* **Practicum 7**: [practicum7.ipynb](/materials/day4/practicum7.ipynb), [data\_rtp.csv](/materials/day4/data_rtp.csv),[df\_tou.csv](/materials/day4/df_tou.csv), [practicum1_slides.pdf](/materials/day4/practicum7_slides.pdf)
+* **Practicum 7**: [practicum7.ipynb](/materials/day4/practicum7.ipynb), [data\_rtp.csv](/materials/day4/data_rtp.csv),[df\_tou.csv](/materials/day4/df_tou.csv), [practicum7_slides.pdf](/materials/day4/practicum7_slides.pdf)
 * **Practicum 8**: [practicum8.ipynb](/materials/day4/practicum8.ipynb), [data\_jaere\_clustered.csv](/materials/day1/data_jaere_clustered.csv),[data\_technology.csv](/materials/day1/data_technology.csv), [practicum8_slides.pdf](/materials/day4/practicum8_slides.pdf)
 
 <!-- ## Homework -->
